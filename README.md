@@ -17,8 +17,8 @@ This Python script estimates the **carbohydrate content** of food items in an im
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/your-username/food-carb-estimator.git
-   cd food-carb-estimator
+   git clone https://github.com/hugomilosz/carbohydrateguesser.git
+   cd carbohydrateguesser
    ```
 
 2. **Install Dependencies:**
@@ -27,10 +27,7 @@ This Python script estimates the **carbohydrate content** of food items in an im
    ```
 
 3. **Set your API key:**
-   Export your Groq API key as an environment variable:
-   ```bash
-   export GROQ_API_KEY='your_api_key_here'
-   ```
+   Add your Groq API key in config.json.
 
 ---
 
