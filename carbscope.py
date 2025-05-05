@@ -12,14 +12,14 @@ st.set_page_config(
 )
 
 def main():
-    st.title("🥗 Food Carbohydrate Estimator")
+    st.title("🍔🔬 CarbScope - Carbohydrate Estimator")
 
     st.write("""
     This app estimates the carbohydrate content in food images using Groq's AI model.
     Upload a food image or provide a URL to get started.
     """)
 
-    tab1, tab2 = st.tabs(["Upload Image", "Image URL"])
+    tab1, tab2 = st.tabs(["📁 Upload Image", "🌐 Image via URL"])
     image_width = 400
 
     with tab1:
@@ -44,12 +44,12 @@ def main():
                 with col1:
                     st.image(image, caption="Image from URL", width=image_width)
 
-                if st.button("Estimate Carbohydrates", key="estimate_url"):
+                if st.button("📊 Estimate Carbohydrates", key="estimate_url"):
                     with st.spinner("Analyzing image..."):
                         result = estimate_carbs_in_image(image_url)
                         if result:
                             st.success("Analysis completed!")
-                            st.subheader("Carbohydrate Estimation Results")
+                            st.subheader("🧾 Carbohydrate Estimation Results")
                             st.write(result.content)
                             st.download_button(
                                 label="Download Results",
@@ -61,8 +61,8 @@ def main():
                 st.error(f"Error loading image from URL: {str(e)}")
 
     st.divider()
-    st.caption("Powered by Groq's Llama 4 Scout model")
-    st.caption("Programmed by Hugo Miloszewski")
+    st.caption("🔍 Powered by Groq's Llama 4 Scout model")
+    st.caption("👨‍💻 Developed by Hugo Miloszewski")
 
 if __name__ == "__main__":
     main()
