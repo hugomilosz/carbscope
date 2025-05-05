@@ -1,41 +1,46 @@
-# 🥗 Carbohydrate Estimator from Food Images using Groq + LLaMA 4
+# 🍔🔬 CarbScope - Carbohydrate Estimator from Food Images using Groq + LLaMA 4
 
-This Python script estimates the **carbohydrate content** of food items in an image using the **Groq API** with the **LLaMA 4 Scout model**. Simply provide a URL to a food image, and it will return a structured breakdown of estimated carbs per item and the total for the entire dish.
+**CarbScope** estimates the **carbohydrate content** of food items in an image using the **Groq API** with the **LLaMA 4 Scout model**. Simply provide a URL or upload an image from your device, and it will return a structured breakdown of estimated carbs per item and the total for the entire dish.
 
 ---
 
 ## 📦 Features
 
-- 🔍 Identifies food items in an image  
+- 🔍 Identifies food items in an image
 - 🧮 Estimates carbohydrates (in grams) per item  
 - 🥄 Includes serving size assumptions  
 - 📊 Summarises total carbohydrates for the dish  
-
+- 📤 Accepts file upload or image URL
 ---
 
 ## 🚀 Installation
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/hugomilosz/carbohydrateguesser.git
-   cd carbohydrateguesser
+   git clone https://github.com/hugomilosz/carbscope.git
+   cd carbscope
    ```
 
 2. **Install Dependencies:**
    ```bash
-   pip install groq
+   pip install -r requirements.txt
    ```
 
 3. **Set your API key:**
    Add your Groq API key in config.json.
+   ```bash
+   {
+     "GROQ_API_KEY": "your_groq_api_key_here"
+   }
+   ```
 
 ---
 
 ## 📸 Usage
 
-Run the script from the command line with the image URL:
+Run the Streamlit app locally:
 ```bash
-python carb_estimator.py --image_url "https://example.com/your_food_image.jpg"
+streamlit run carbscope.py
 ```
 
 ## 📝 Example Output
