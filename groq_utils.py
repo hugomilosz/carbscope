@@ -1,6 +1,7 @@
 # groq_utils.py
 
 import json
+import base64
 from groq import Groq
 import streamlit as st
 
@@ -15,32 +16,65 @@ def load_api_key():
     except Exception:
         return st.session_state.get("api_key", "")
 
-def estimate_carbs_in_image(image_url):
+def encode_image_to_base64(image):
     """
-    Estimate the carbohydrate content in a food image using Groq's LLM.
-    
-    Args:
-        image_url (str): URL of the food image to analyse
-    
-    Returns:
-        dict: The response containing carbohydrate estimation
+    Convert a PIL image to a base64-encoded string.
+    """
+    from io import BytesIO
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+def estimate_carbs_in_image(image_url=None, base64_image=None):
+    """
+    Estimate carbs in an image from a URL or a base64 string.
     """
     api_key = load_api_key()
     if not api_key:
-        st.error("API key is missing. Please enter your Groq API key.")
+        st.error("API key is missing.")
         return None
-    
+
     client = Groq(api_key=api_key)
 
-    prompt = """
-    Please analyze this food image and provide:
-    1. Identification of all food items visible in the image
-    2. An estimate of the total carbohydrates (in grams) for each identified food item
-    3. The approximate serving size you're basing the estimate on
-    4. The total estimated carbohydrates for the entire meal/dish
+    if base64_image:
+        image_payload = {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{base64_image}"
+            }
+        }
+    elif image_url:
+        image_payload = {
+            "type": "image_url",
+            "image_url": {
+                "url": image_url
+            }
+        }
+    else:
+        st.error("No image provided.")
+        return None
 
-    Format your response as a structured analysis with clear headings and a final total.
-    If you cannot identify the food or estimate carbs with reasonable confidence, please state this clearly.
+    prompt = """
+    You are analyzing a food image. Please respond using **two clear sections**:
+
+    ---
+
+    [SUMMARY]
+    <just the total carbohydrate estimate in grams, number only, no units, no text — e.g., 13 OR 100>
+
+    ---
+
+    [DETAILED ANALYSIS]
+
+    1. **Identified Food Items**: List and describe each food item visible in the image.
+    2. **Carbohydrate Estimate per Item**: Provide estimates (in grams) for each food item.
+    3. **Serving Sizes**: Indicate the assumed serving size for each item.
+    4. **Estimation Basis**: Explain how these estimates were derived (e.g., typical portions, standard databases).
+    5. **Total Carbohydrates**: Restate the total with units and a short human-readable summary.
+
+    If you are unsure about any food or values, please clearly state that.
+
+    Make the analysis structured and clear with proper markdown formatting.
     """
 
     try:
@@ -50,16 +84,8 @@ def estimate_carbs_in_image(image_url):
                 {
                     "role": "user",
                     "content": [
-                        {
-                            "type": "text",
-                            "text": prompt
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": image_url
-                            }
-                        }
+                        {"type": "text", "text": prompt},
+                        image_payload
                     ]
                 }
             ],
