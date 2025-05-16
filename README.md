@@ -2,7 +2,7 @@
 
 **CarbScope** estimates the **carbohydrate content** of food items in an image using the **Groq API** with the **LLaMA 4 Scout model**. Simply provide a URL or upload an image from your device, and it will return a structured breakdown of estimated carbs per item and the total for the entire dish.
 
-<img src="https://github.com/user-attachments/assets/6a5409e7-168f-4ff0-b264-c6d264db9950" width="80%">
+<img src="https://github.com/user-attachments/assets/bedb8171-a4c5-4d91-b834-3a168cba9b99" width="80%">
 
 ---
 
