@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { ChevronDown, ChevronUp, Trash2, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 type Analysis = {
@@ -95,72 +95,133 @@ export default function History({ userId }: Props) {
   }
 
   return (
-    <div className="mt-10">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">📚 Your History</h2>
-        <input
-          type="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-          className="border rounded px-2 py-1 text-sm"
-        />
+    <div className="relative">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-lg">
+            <TrendingUp className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              📚 Your History
+            </h2>
+            <p className="text-white/70">Track your nutritional journey</p>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 transition-all duration-300"
+          />
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10 text-gray-500">
-          <Loader2 className="animate-spin w-6 h-6" />
+        <div className="flex flex-col items-center justify-center py-16 text-white/70">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+            <Loader2 className="animate-spin w-8 h-8 text-white" />
+          </div>
+          <p className="text-lg font-medium">Loading your analysis history...</p>
         </div>
       ) : error ? (
-        <p className="text-red-600">{error}</p>
+        <div className="bg-red-500/20 border border-red-400/30 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+            <p className="text-red-200 font-medium">{error}</p>
+          </div>
+        </div>
       ) : history.length === 0 ? (
-        <p className="text-gray-500">No entries found.</p>
+        <div className="text-center py-16">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+            <span className="text-4xl">📭</span>
+          </div>
+          <p className="text-white/60 text-lg font-medium mb-2">No entries found</p>
+          <p className="text-white/40">Upload and analyze your first food image to get started!</p>
+        </div>
       ) : (
-        <div className="max-h-[500px] overflow-y-auto space-y-4 pr-2">
-          {history.map((entry) => {
+        <div className="max-h-[600px] overflow-y-auto space-y-6 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+          {history.map((entry, index) => {
             const isExpanded = expanded === entry.id
             return (
               <div
                 key={entry.id}
-                className="bg-white border rounded-lg shadow-sm p-4 transition hover:shadow-md"
+                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:bg-white/15 hover:shadow-2xl hover:scale-[1.02] group"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animation: 'fadeInUp 0.6s ease-out forwards'
+                }}
               >
                 <div className="flex justify-between items-center">
-                  <div className="flex gap-4 items-center">
-                    <img
-                      src={signedUrls[entry.id] ?? '/placeholder-image.png'}
-                      alt="Food"
-                      className="w-16 h-16 object-cover rounded border"
-                    />
+                  <div className="flex gap-6 items-center">
+                    <div className="relative">
+                      <img
+                        src={signedUrls[entry.id] ?? '/placeholder-image.png'}
+                        alt="Food"
+                        className="w-20 h-20 object-cover rounded-xl border-2 border-white/20 shadow-lg group-hover:border-purple-400/50 transition-all duration-300"
+                      />
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-full flex items-center justify-center shadow-md">
+                        <Sparkles className="w-3 h-3 text-white" />
+                      </div>
+                    </div>
                     <div>
-                      <p className="font-medium text-green-600 text-lg">
-                        {entry.result_summary}g carbs
-                      </p>
-                      <p className="text-xs text-gray-500">
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                          {entry.result_summary}g
+                        </p>
+                        <span className="bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-sm px-3 py-1 rounded-full font-medium">
+                          carbs
+                        </span>
+                      </div>
+                      <p className="text-white/60 text-sm flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
                         {new Date(entry.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : entry.id)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 text-blue-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 group/btn"
                     >
-                      {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      {isExpanded ? 
+                        <ChevronUp size={20} className="group-hover/btn:scale-110 transition-transform" /> : 
+                        <ChevronDown size={20} className="group-hover/btn:scale-110 transition-transform" />
+                      }
                     </button>
 
                     <button
                       onClick={() => deleteEntry(entry.id)}
                       disabled={deletingId === entry.id}
-                      className="text-red-500 hover:text-red-700"
+                      className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed group/btn"
                     >
-                      <Trash2 size={18} />
+                      {deletingId === entry.id ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={18} className="group-hover/btn:scale-110 transition-transform" />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-3 bg-gray-50 border rounded p-3 text-sm text-gray-700 prose max-w-none">
-                    <ReactMarkdown>{entry.result_details}</ReactMarkdown>
+                  <div className="mt-6 pt-6 border-t border-white/10">
+                    <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl p-5">
+                      <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                          <span className="text-xs">📊</span>
+                        </div>
+                        Detailed Analysis
+                      </h4>
+                      <div className="prose prose-invert max-w-none text-white/90 leading-relaxed">
+                        <ReactMarkdown>{entry.result_details}</ReactMarkdown>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -168,6 +229,19 @@ export default function History({ userId }: Props) {
           })}
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   )
 }

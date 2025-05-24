@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { imageUrl } = await req.json()
+    const { imageUrl, userContext, mealSize } = await req.json()
+
     if (!imageUrl) {
       return NextResponse.json({ error: 'Missing imageUrl' }, { status: 400 })
     }
@@ -20,6 +21,8 @@ export async function POST(req: NextRequest) {
     const imageBuffer = await imageResponse.arrayBuffer()
     // Convert to base64 string
     const base64Image = Buffer.from(imageBuffer).toString('base64')
+
+    const sizeNote = mealSize ? `The portion size is: ${mealSize}.` : ''
 
     // Prepare Groq API payload
     const prompt = `
@@ -39,7 +42,11 @@ export async function POST(req: NextRequest) {
       3. **Serving Sizes**: Indicate the assumed serving size for each item.
       4. **Estimation Basis**: Explain how these estimates were derived.
       5. **Total Carbohydrates**: Restate the total with units and a short human-readable summary.
+
+      ${sizeNote}
+      ${userContext ? `\nAdditional user-provided context: "${userContext}"` : ''}
     `
+
 
     const imagePayload = {
       type: 'image_url',
