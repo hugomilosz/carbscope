@@ -26,17 +26,25 @@ export default function Home() {
     setError(null)
 
     try {
+      const { data: signedUrlData, error: urlError } = await supabase
+        .storage
+        .from('images')
+        .createSignedUrl(uploadedImageUrl, 60 * 5)
+
+      if (urlError || !signedUrlData?.signedUrl) {
+        throw new Error('Failed to generate image access URL')
+      }
+
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: uploadedImageUrl }),
+        body: JSON.stringify({ imageUrl: signedUrlData.signedUrl }),
       })
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
       const data = await res.json()
       setAnalysis(data)
 
-      // Save to Supabase
       const { error: insertError } = await supabase.from('analyses').insert({
         user_id: user!.id,
         image_url: uploadedImageUrl,
@@ -47,14 +55,13 @@ export default function Home() {
       if (insertError) {
         console.error('Failed to save analysis:', insertError.message)
       }
-
-
     } catch (err: any) {
       setError(err.message || 'Failed to analyse image')
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
@@ -71,8 +78,8 @@ export default function Home() {
 
         <ImageUpload
           userId={user.id}
-          onUploadComplete={(url) => {
-            setUploadedImageUrl(url)
+          onUploadComplete={(filePath) => {
+            setUploadedImageUrl(filePath)
             setAnalysis(null)
           }}
         />

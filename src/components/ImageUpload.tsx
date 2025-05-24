@@ -53,21 +53,10 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
       return
     }
 
-    const { data, error: urlError } = await supabase
-      .storage
-      .from('images')
-      .createSignedUrl(filePath, 60 * 5)
-
     setLoading(false)
-
-    if (urlError || !data?.signedUrl) {
-      setError('Failed to generate image URL.')
-      return
-    }
-
-    setUploadedUrl(data.signedUrl)
-    onUploadComplete?.(data.signedUrl)
+    onUploadComplete?.(filePath)
   }
+
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md mx-auto space-y-4">

@@ -54,18 +54,17 @@ export default function History({ userId }: Props) {
 
         // Generate signed URLs for each entry
         const urls: Record<string, string> = {}
-        // for (const entry of data) {
-        // // Assuming entry.image_url is the file path inside the bucket
-        //     const { data: urlData, error: urlError } = await supabase.storage
-        //         .from('images')
-        //         .createSignedUrl(entry.image_url, 60 * 60) // 1 hour expiration
+        for (const entry of data) {
+          const { data: urlData, error: urlError } = await supabase.storage
+            .from('images')
+            .createSignedUrl(entry.image_url, 60 * 60) // 1 hour expiry
 
-        //     if (urlError) {
-        //         console.error('Failed to create signed URL for', entry.id, urlError)
-        //     } else if (urlData?.signedUrl) {
-        //         urls[entry.id] = urlData.signedUrl
-        //     }
-        // }
+          if (urlError) {
+            console.error('Failed to create signed URL for', entry.image_url, urlError)
+          } else if (urlData?.signedUrl) {
+            urls[entry.id] = urlData.signedUrl
+          }
+        }
         setSignedUrls(urls)
     }
 
@@ -127,7 +126,7 @@ export default function History({ userId }: Props) {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-4 items-center">
                     <img
-                      src={entry.image_url ?? '/placeholder-image.png'}
+                      src={signedUrls[entry.id] ?? '/placeholder-image.png'}
                       alt="Food"
                       className="w-16 h-16 object-cover rounded border"
                     />
