@@ -100,7 +100,8 @@ export default function Home() {
 
             <h3 className="font-semibold text-gray-700 mb-1">📊 Detailed Analysis</h3>
             <div className="prose max-w-none text-gray-800 bg-white p-3 rounded-md border whitespace-pre-wrap">
-              <ReactMarkdown>{analysis.details}</ReactMarkdown>
+              {/* <ReactMarkdown>{analysis.details}</ReactMarkdown> */}
+              {analysis.details}
             </div>
           </div>
         )}
