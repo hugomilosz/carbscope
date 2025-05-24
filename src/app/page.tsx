@@ -60,7 +60,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-blue-700">CarbScope</h1>
+          <h1 className="text-3xl font-bold text-blue-700">🍔🔬 CarbScope - Carbohydrate Estimator</h1>
           <button
             onClick={() => signOut()}
             className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
