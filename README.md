@@ -1,46 +1,40 @@
 # 🍔🔬 CarbScope - Carbohydrate Estimator from Food Images using Groq + LLaMA 4
 
-**CarbScope** estimates the **carbohydrate content** of food items in an image using the **Groq API** with the **LLaMA 4 Scout model**. Simply provide a URL or upload an image from your device, and it will return a structured breakdown of estimated carbs per item and the total for the entire dish.
+**CarbScope** is a web application that estimates the carbohydrate content of food items from an image using **Groq API** with the **Meta Llama 4 Scout** model. Built with Next.js and Supabase, it allows users to upload food images, receive a total carbohydrate estimate and itemised background, and track their analysis history.
 
-<img src="https://github.com/user-attachments/assets/bedb8171-a4c5-4d91-b834-3a168cba9b99" width="80%">
+🔗 Live Demo: [https://carbscope-yqcl.vercel.app](https://carbscope-yqcl.vercel.app)
 
 ---
 
 ## 📦 Features
 
-- 🔍 Identifies food items in an image
-- 🧮 Estimates carbohydrates per item  
-- 🥄 Includes serving size assumptions  
-- 📊 Summarises total carbohydrates for the dish  
-- 📤 Accepts file upload or image URL
+- 🔐 **User Authentication**  
+  Secure login and user management powered by **Supabase Auth**.
+
+- 🖼️ **Image Upload**  
+  Drag-and-drop or use a file picker to upload food images. Files are securely stored in **Supabase Storage**.
+
+- 🧮 **Carbohydrate Estimation**  
+  Get total carbohydrate estimates for the dish and per item using **LLaMA 4 Scout via Groq**.
+
+- 🍽️ **Meal Context Input**  
+  - **Meal Size Selector**: Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
+  - **Optional Text Context**: Add extra information (e.g., "contains rice and beans") to refine results.
+
+- 📜 **Analysis History**  
+  Users can view a log of their previous analyses, stored in Supabase.
+  
 ---
 
-## 🚀 Installation
+## 🛠️ Tech Stack
 
-1. **Clone the repo:**
-   ```bash
-   git clone https://github.com/hugomilosz/carbscope.git
-   cd carbscope
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set your API key:**
-   Add your Groq API key in config.json.
-   ```bash
-   {
-     "GROQ_API_KEY": "your_groq_api_key_here"
-   }
-   ```
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS, Lucide React  
+- **Backend API**: Next.js API Routes
+- **AI Processing**: [Groq API](https://groq.com/) with `meta-llama/llama-4-scout-17b-16e-instruct`  
+- **Authentication & Database**: Supabase (Auth, Postgres, Storage)
 
 ---
 
-## 📸 Usage
+## 🚀 Deployment
 
-Run the Streamlit app locally:
-```bash
-streamlit run carbscope.py
-```
+This app is deployed using [Vercel](https://vercel.com/) with environment variables for Supabase and Groq API integration.
