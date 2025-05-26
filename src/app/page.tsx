@@ -7,6 +7,8 @@ import ImageUpload from '../components/ImageUpload'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
 import { Camera, Zap, TrendingUp, Shield, Sparkles, ArrowRight, Upload, Loader2, Check } from 'lucide-react'
+import { Analytics } from '@vercel/analytics/react'
+
 
 const supabase = createClientComponentClient()
 
@@ -298,6 +300,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   )
 }
