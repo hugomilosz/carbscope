@@ -116,7 +116,7 @@ export default function History({ userId }: Props) {
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 transition-all duration-300"
+            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 transition-all duration-300"
           />
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function History({ userId }: Props) {
           <p className="text-lg font-medium">Loading your analysis history...</p>
         </div>
       ) : error ? (
-        <div className="bg-red-500/20 border border-red-400/30 rounded-2xl p-6 backdrop-blur-sm">
+        <div className="bg-red-500/20 border border-red-400/30 rounded-2xl p-6">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
             <p className="text-red-200 font-medium">{error}</p>
@@ -150,7 +150,7 @@ export default function History({ userId }: Props) {
             return (
               <div
                 key={entry.id}
-                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:bg-white/15 hover:shadow-2xl hover:scale-[1.02] group"
+                className="bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:bg-white/15 hover:shadow-2xl hover:scale-[1.02] group"
                 style={{
                   animationDelay: `${index * 100}ms`,
                   animation: 'fadeInUp 0.6s ease-out forwards'
@@ -211,7 +211,7 @@ export default function History({ userId }: Props) {
 
                 {isExpanded && (
                   <div className="mt-6 pt-6 border-t border-white/10">
-                    <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl p-5">
+                    <div className="bg-black/20 border border-white/10 rounded-xl p-5">
                       <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
                           <span className="text-xs">📊</span>
