@@ -113,7 +113,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
     <div className="space-y-6">
       {/* Upload Header */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 mb-4">
+        <div className="inline-flex items-center gap-3 bg-white/10 border border-white/20 rounded-full px-6 py-3 mb-4">
           <Camera className="w-5 h-5 text-purple-400" />
           <span className="text-white font-medium">Upload Image</span>
           <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
@@ -198,7 +198,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
           </div>
           
           {uploadProgress > 0 && (
-            <div className="bg-white/10 rounded-full h-3 overflow-hidden backdrop-blur-sm border border-white/20">
+            <div className="bg-white/10 rounded-full h-3 overflow-hidden border border-white/20">
               <div 
                 className="h-full bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 transition-all duration-300 ease-out rounded-full relative overflow-hidden"
                 style={{ width: `${uploadProgress}%` }}
@@ -212,7 +212,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
 
       {/* Success Message */}
       {uploadedUrl && !loading && (
-        <div className="bg-emerald-500/20 border border-emerald-400/30 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-emerald-500/20 border border-emerald-400/30 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-xl flex items-center justify-center shadow-lg">
               <CheckCircle className="w-5 h-5 text-white" />
@@ -227,7 +227,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
               <AlertCircle className="w-5 h-5 text-white" />

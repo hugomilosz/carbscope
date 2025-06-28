@@ -109,7 +109,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <div className="flex justify-between items-center mb-6">
               <div className="flex-1"></div>
-              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-3">
+              <div className="inline-flex items-center gap-3 bg-white/10 border border-white/20 rounded-full px-6 py-3">
                 <Sparkles className="w-5 h-5 text-yellow-400 animate-spin" />
                 <span className="text-white/90 font-medium">AI-Powered Nutrition Analysis</span>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -117,7 +117,7 @@ export default function Home() {
               <div className="flex-1 flex justify-end">
                 <button
                   onClick={() => signOut()}
-                  className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm"
+                  className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 px-4 py-2 rounded-full transition-all duration-300"
                 >
                   Logout
                 </button>
@@ -133,7 +133,7 @@ export default function Home() {
           </div>
 
           {/* Main Card */}
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl mb-8 transform hover:scale-[1.02] transition-all duration-300">
+          <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8 transform hover:scale-[1.02] transition-all duration-300">
             {/* Image Upload Component */}
             <div className="mb-8">
               <ImageUpload
@@ -157,7 +157,7 @@ export default function Home() {
                         ${isSelected
                           ? 'bg-purple-500/20 border-purple-400/50 ring-2 ring-purple-300'
                           : 'bg-white/5 border-white/10'}
-                        border backdrop-blur-sm hover:bg-white/10`}
+                        border hover:bg-white/10`}
                     >
                       <input
                         type="radio"
@@ -234,7 +234,7 @@ export default function Home() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-500/20 border border-red-400/30 rounded-xl text-red-200 backdrop-blur-sm">
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-400/30 rounded-xl text-red-200">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-400 rounded-full"></div>
                   {error}
@@ -246,7 +246,7 @@ export default function Home() {
             {analysis && (
               <div className="space-y-6">
                 {/* Summary Card */}
-                <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-6">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-xl flex items-center justify-center shadow-lg">
                       <TrendingUp className="w-6 h-6 text-white" />
@@ -266,7 +266,7 @@ export default function Home() {
                 </div>
 
                 {/* Detailed Analysis */}
-                <div className="bg-white/10 border border-white/20 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="bg-white/10 border border-white/20 rounded-2xl p-6">
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
                       <span className="text-sm">📊</span>
@@ -282,7 +282,7 @@ export default function Home() {
           </div>
 
           {/* History Component */}
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl mb-8">
+          <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8">
             <History userId={user!.id} />
           </div>
 
