@@ -20,8 +20,8 @@ https://github.com/user-attachments/assets/5ebfcaac-c401-4cb2-9de7-286abb1a422d
   Get total carbohydrate estimates for the dish and per item using **LLaMA 4 Scout via Groq**.
 
 - 🍽️ **Meal Context Input**  
-  - **Meal Size Selector**: Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
-  - **Optional Text Context**: Add extra information (e.g., "contains rice and beans") to refine results.
+  Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
+  Optionally, add extra information (e.g. "contains rice and beans") to refine results.
 
 - 📜 **Analysis History**  
   Users can view a log of their previous analyses, stored in Supabase.
