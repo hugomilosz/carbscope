@@ -6,7 +6,7 @@ import Login from '../components/Login'
 import ImageUpload from '../components/ImageUpload'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
-import { Camera, Zap, TrendingUp, Shield, Sparkles, ArrowRight, Upload, Loader2, Check } from 'lucide-react'
+import { Camera, Zap, TrendingUp, Shield, Sparkles, ArrowRight, Upload, Loader2, Check, ArrowLeft } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
 
 
@@ -14,6 +14,7 @@ const supabase = createClientComponentClient()
 
 export default function Home() {
   const { user, signOut } = useAuth()
+  const [isGuest, setIsGuest] = useState(false) // State to manage guest mode
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [analysis, setAnalysis] = useState<{ summary: string; details: string } | null>(null)
   const [loading, setLoading] = useState(false)
@@ -23,15 +24,22 @@ export default function Home() {
   const [userContext, setUserContext] = useState('')
   const [mealSize, setMealSize] = useState('standard') 
 
+  // If not a logged-in user AND not a guest, show the Login component.
+  if (!user && !isGuest) {
+    return <Login onGuestLogin={() => setIsGuest(true)} />
+  }
 
-  if (!user) return <Login />
+  function handleGoBack() {
+    setIsGuest(false)
+    setUploadedImageUrl(null)
+    setAnalysis(null)
+  }
 
   async function analyzeImage() {
     if (!uploadedImageUrl) return
     setLoading(true)
     setError(null)
 
-    // Progress simulation for UI feedback
     const progressInterval = setInterval(() => {
       setUploadProgress(prev => Math.min(prev + Math.random() * 15, 85))
     }, 300)
@@ -59,16 +67,20 @@ export default function Home() {
       setUploadProgress(100)
       setAnalysis(data)
 
-      const { error: insertError } = await supabase.from('analyses').insert({
-        user_id: user!.id,
-        image_url: uploadedImageUrl,
-        result_summary: data.summary,
-        result_details: data.details,
-      })
-
-      if (insertError) {
-        console.error('Failed to save analysis:', insertError.message)
+      // Only save analysis if a user is logged in
+      if (user) {
+        const { error: insertError } = await supabase.from('analyses').insert({
+          user_id: user.id,
+          image_url: uploadedImageUrl,
+          result_summary: data.summary,
+          result_details: data.details,
+        })
+  
+        if (insertError) {
+          console.error('Failed to save analysis:', insertError.message)
+        }
       }
+      // END: Only save analysis
     } catch (err: any) {
       clearInterval(progressInterval)
       setError(err.message || 'Failed to analyse image')
@@ -115,12 +127,22 @@ export default function Home() {
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </div>
               <div className="flex-1 flex justify-end">
-                <button
-                  onClick={() => signOut()}
-                  className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 px-4 py-2 rounded-full transition-all duration-300"
-                >
-                  Logout
-                </button>
+                {user ? (
+                  <button
+                    onClick={() => signOut()}
+                    className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 px-4 py-2 rounded-full transition-all duration-300"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGoBack}
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 px-4 py-2 rounded-full transition-all duration-300"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Login
+                  </button>
+                )}
               </div>
             </div>
             
@@ -136,8 +158,9 @@ export default function Home() {
           <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8 transform hover:scale-[1.02] transition-all duration-300">
             {/* Image Upload Component */}
             <div className="mb-8">
+              {/* Pass a generic ID for guests */}
               <ImageUpload
-                userId={user.id}
+                userId={user ? user.id : 'guest-sessions'}
                 onUploadComplete={(filePath) => {
                   setUploadedImageUrl(filePath)
                   setAnalysis(null)
@@ -281,10 +304,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* History Component */}
-          <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8">
-            <History userId={user!.id} />
-          </div>
+          {/* Show History if a user exists */}
+          {user && (
+            <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8">
+              <History userId={user!.id} />
+            </div>
+          )}
 
           {/* Footer */}
           <div className="text-center space-y-4 text-white/60">

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useAuth } from './AuthProvider'
-import { Mail, Lock, Sparkles, LogIn, Chrome, AlertCircle, Loader2 } from 'lucide-react'
+import { Mail, Lock, Sparkles, LogIn, Chrome, AlertCircle, Loader2, User } from 'lucide-react'
 
-export default function Login() {
+export default function Login({ onGuestLogin }: { onGuestLogin: () => void }) {
   const { signIn, signInWithGoogle } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -78,7 +78,6 @@ export default function Login() {
             <h1 className="text-4xl font-black bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
               CarbScope
             </h1>
-            {/* <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2> */}
             <p className="text-white/70">Sign in to start counting your carbs</p>
           </div>
 
@@ -169,10 +168,23 @@ export default function Login() {
               )}
             </div>
           </button>
+          
+          {/* Guest Login Button */}
+          <button
+            type="button"
+            onClick={onGuestLogin}
+            className="w-full mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl group relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <div className="relative flex items-center justify-center gap-3">
+              <User className="w-5 h-5 text-white/80" />
+              <span>Continue as Guest</span>
+            </div>
+          </button>
 
           {/* Error Message */}
           {error && (
-            <div className="mt-6 bg-red-500/20 border border-red-400/30 rounded-xl p-4 backdrop-blur-sm">
+            <div className="mt-6 bg-red-500/20 border border-red-400/30 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                   <AlertCircle className="w-5 h-5 text-white" />
