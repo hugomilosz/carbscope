@@ -4,6 +4,8 @@
 
 🔗 Live Demo: [https://carbscope-yqcl.vercel.app](https://carbscope-yqcl.vercel.app)
 
+https://github.com/user-attachments/assets/5ebfcaac-c401-4cb2-9de7-286abb1a422d
+
 ---
 
 ## 📦 Features
