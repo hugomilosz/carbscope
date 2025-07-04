@@ -6,6 +6,7 @@ import Login from '../components/Login'
 import ImageUpload from '../components/ImageUpload'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
+import Stats from '../components/Stats'
 import { Camera, Zap, TrendingUp, Shield, Sparkles, ArrowRight, Upload, Loader2, Check, ArrowLeft } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -303,6 +304,11 @@ export default function Home() {
               </div>
             )}
           </div>
+
+          {/* Show Stats if a user exists */}
+          {user && (
+            <Stats userId={user!.id} />
+          )}
 
           {/* Show History if a user exists */}
           {user && (

@@ -17,9 +17,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch image' }, { status: 400 })
     }
 
-    // Read image as buffer
+    // Read image as buffer and convert to base64 string
     const imageBuffer = await imageResponse.arrayBuffer()
-    // Convert to base64 string
     const base64Image = Buffer.from(imageBuffer).toString('base64')
 
     const sizeNote = mealSize ? `The portion size is: ${mealSize}.` : ''

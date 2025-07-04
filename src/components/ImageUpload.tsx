@@ -184,7 +184,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
         )}
 
         {/* Animated border effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
       </div>
 
       {/* Upload Progress */}
@@ -219,7 +219,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
             </div>
             <div>
               <p className="text-emerald-200 font-medium">Upload Successful!</p>
-              <p className="text-emerald-300/80 text-sm">Ready to analyze your food image</p>
+              <p className="text-emerald-300/80 text-sm">Ready to analyse your food image</p>
             </div>
           </div>
         </div>

@@ -141,7 +141,7 @@ export default function History({ userId }: Props) {
             <span className="text-4xl">📭</span>
           </div>
           <p className="text-white/60 text-lg font-medium mb-2">No entries found</p>
-          <p className="text-white/40">Upload and analyze your first food image to get started!</p>
+          <p className="text-white/40">Upload and analyse your first food image to get started!</p>
         </div>
       ) : (
         <div className="max-h-[600px] overflow-y-auto space-y-6 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
