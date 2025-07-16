@@ -46,19 +46,30 @@ export default function Home() {
     }, 300)
 
     try {
-      const { data: signedUrlData, error: urlError } = await supabase
-        .storage
-        .from('images')
-        .createSignedUrl(uploadedImageUrl, 60 * 5)
+      let imageUrlForApi: string;
+      // For guests, the uploadedImageUrl is a Base64 data URL.
+      // For logged-in users, it's a file path that needs a signed URL.
+      if (isGuest && uploadedImageUrl.startsWith('data:image/')) {
+        imageUrlForApi = uploadedImageUrl;
+      } else if (user) {
+        const { data: signedUrlData, error: urlError } = await supabase
+          .storage
+          .from('images')
+          .createSignedUrl(uploadedImageUrl, 60 * 5) // 5 minute validity
 
-      if (urlError || !signedUrlData?.signedUrl) {
-        throw new Error('Failed to generate image access URL')
+        if (urlError || !signedUrlData?.signedUrl) {
+          throw new Error('Failed to generate image access URL')
+        }
+        imageUrlForApi = signedUrlData.signedUrl;
+      } else {
+        throw new Error("Invalid image state for analysis.");
       }
 
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: signedUrlData.signedUrl, userContext, mealSize }),
+        // The API now receives either a signed URL or a data URL
+        body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize }),
       })
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -72,7 +83,7 @@ export default function Home() {
       if (user) {
         const { error: insertError } = await supabase.from('analyses').insert({
           user_id: user.id,
-          image_url: uploadedImageUrl,
+          image_url: uploadedImageUrl, // Save the path, not the signed URL
           result_summary: data.summary,
           result_details: data.details,
         })
@@ -81,7 +92,6 @@ export default function Home() {
           console.error('Failed to save analysis:', insertError.message)
         }
       }
-      // END: Only save analysis
     } catch (err: any) {
       clearInterval(progressInterval)
       setError(err.message || 'Failed to analyse image')
@@ -162,8 +172,9 @@ export default function Home() {
               {/* Pass a generic ID for guests */}
               <ImageUpload
                 userId={user ? user.id : 'guest-sessions'}
-                onUploadComplete={(filePath) => {
-                  setUploadedImageUrl(filePath)
+                isGuest={isGuest} 
+                onUploadComplete={(filePathOrDataUrl) => {
+                  setUploadedImageUrl(filePathOrDataUrl)
                   setAnalysis(null)
                 }}
               />

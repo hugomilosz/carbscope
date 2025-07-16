@@ -6,10 +6,11 @@ import { Loader2, Upload, Camera, Image, CheckCircle, AlertCircle } from 'lucide
 
 type Props = {
   userId: string
+  isGuest?: boolean
   onUploadComplete?: (url: string) => void
 }
 
-export default function ImageUpload({ userId, onUploadComplete }: Props) {
+export default function ImageUpload({ userId, isGuest = false, onUploadComplete }: Props) {
   const supabase = createClientComponentClient()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -21,10 +22,19 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (file) {
-      uploadImage(file)
+    if (!file) return;
+    // If the user is a guest, don't upload. Instead, convert the file to a
+    // Base64 data URL and pass it to the parent.
+    if (isGuest) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onUploadComplete?.(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      uploadImage(file);
     }
-  }, [file])
+  }, [file, isGuest]);
 
   function processFile(file: File | null) {
     setError(null);
@@ -61,7 +71,7 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
 
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(f => f.type.startsWith('image/')) ?? null;
-    processFile(imageFile); // ✅ this now works perfectly
+    processFile(imageFile);
   }
 
   function handleDragOver(e: React.DragEvent) {
@@ -79,7 +89,6 @@ export default function ImageUpload({ userId, onUploadComplete }: Props) {
     setError(null)
     setUploadProgress(0)
 
-    // Progress simulation for UI feedback
     const progressInterval = setInterval(() => {
       setUploadProgress(prev => Math.min(prev + Math.random() * 20, 90))
     }, 200)
