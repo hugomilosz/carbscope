@@ -15,7 +15,7 @@ const supabase = createClientComponentClient()
 
 export default function Home() {
   const { user, signOut } = useAuth()
-  const [isGuest, setIsGuest] = useState(false) // State to manage guest mode
+  const [isGuest, setIsGuest] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [analysis, setAnalysis] = useState<{ summary: string; details: string } | null>(null)
   const [loading, setLoading] = useState(false)
@@ -55,7 +55,7 @@ export default function Home() {
         const { data: signedUrlData, error: urlError } = await supabase
           .storage
           .from('images')
-          .createSignedUrl(uploadedImageUrl, 60 * 5) // 5 minute validity
+          .createSignedUrl(uploadedImageUrl, 60 * 5)
 
         if (urlError || !signedUrlData?.signedUrl) {
           throw new Error('Failed to generate image access URL')
@@ -68,7 +68,6 @@ export default function Home() {
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // The API now receives either a signed URL or a data URL
         body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize }),
       })
 
@@ -83,7 +82,7 @@ export default function Home() {
       if (user) {
         const { error: insertError } = await supabase.from('analyses').insert({
           user_id: user.id,
-          image_url: uploadedImageUrl, // Save the path, not the signed URL
+          image_url: uploadedImageUrl,
           result_summary: data.summary,
           result_details: data.details,
         })
@@ -108,22 +107,6 @@ export default function Home() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-blue-400 to-cyan-400 rounded-full opacity-15 animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full opacity-10 animate-pulse delay-2000"></div>
-      </div>
-
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-white/10 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
       </div>
 
       <div className="relative z-10 min-h-screen py-8 px-4">
