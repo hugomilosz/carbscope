@@ -150,6 +150,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
           accept="image/*"
           onChange={handleFileChange}
           className="hidden"
+          data-testid="file-input"
         />
 
         {preview ? (
