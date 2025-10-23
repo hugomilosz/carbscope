@@ -143,6 +143,7 @@ export default function Stats({ userId }: Props) {
               <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip
+                cursor={false} 
                 contentStyle={{
                   backgroundColor: 'rgba(30, 30, 40, 0.8)',
                   borderColor: '#4f46e5',
@@ -152,7 +153,7 @@ export default function Stats({ userId }: Props) {
                 labelStyle={{ fontWeight: 'bold' }}
                 formatter={(value) => [`${value}g`, 'Carbs']}
               />
-              <Bar dataKey="totalCarbs" fill="url(#colorUv)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="totalCarbs" fill="url(#colorUv)" radius={[4, 4, 0, 0] } activeBar={{ fill: '#22d3ee', opacity: 1 }}/>
               <defs>
                 <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.8}/>
