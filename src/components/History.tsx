@@ -32,45 +32,38 @@ export default function History({ userId }: Props) {
     setError(null)
 
     let query = supabase
-        .from('analyses')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+      .from('analyses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
 
     if (filterDate) {
-        const start = new Date(filterDate)
-        const end = new Date(filterDate)
-        end.setDate(end.getDate() + 1)
-        query = query.gte('created_at', start.toISOString()).lt('created_at', end.toISOString())
+      const start = new Date(filterDate)
+      const end = new Date(filterDate)
+      end.setDate(end.getDate() + 1)
+      query = query.gte('created_at', start.toISOString()).lt('created_at', end.toISOString())
     }
 
     const { data, error } = await query
 
     if (error) {
-        setError('Failed to fetch history.')
-        setHistory([])
+      setError('Failed to fetch history.')
+      setHistory([])
     } else if (data) {
-        setHistory(data)
+      setHistory(data)
 
-        // Generate signed URLs for each entry
-        const urls: Record<string, string> = {}
-        for (const entry of data) {
-          const { data: urlData, error: urlError } = await supabase.storage
-            .from('images')
-            .createSignedUrl(entry.image_url, 60 * 60) // 1 hour expiry
-
-          if (urlError) {
-            console.error('Failed to create signed URL for', entry.image_url, urlError)
-          } else if (urlData?.signedUrl) {
-            urls[entry.id] = urlData.signedUrl
-          }
-        }
-        setSignedUrls(urls)
+      const urls: Record<string, string> = {}
+      for (const entry of data) {
+        const { data: urlData } = await supabase.storage
+          .from('images')
+          .createSignedUrl(entry.image_url, 60 * 60)
+        if (urlData?.signedUrl) urls[entry.id] = urlData.signedUrl
+      }
+      setSignedUrls(urls)
     }
 
     setLoading(false)
-    }
-
+  }
 
   useEffect(() => {
     if (userId) fetchHistory()
@@ -81,16 +74,9 @@ export default function History({ userId }: Props) {
     if (!confirmed) return
 
     setDeletingId(id)
-
     const { error } = await supabase.from('analyses').delete().eq('id', id)
-
-    if (error) {
-      console.log("FAILED")
-      setError('Failed to delete entry.')
-    } else {
-      setHistory((prev) => prev.filter((item) => item.id !== id))
-    }
-
+    if (error) setError('Failed to delete entry.')
+    else setHistory((prev) => prev.filter((item) => item.id !== id))
     setDeletingId(null)
   }
 
@@ -99,31 +85,31 @@ export default function History({ userId }: Props) {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.3)]">
             <TrendingUp className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               📚 Your History
             </h2>
             <p className="text-white/70">Track your nutritional journey</p>
           </div>
         </div>
-        
+
         <div className="relative">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 transition-all duration-300"
+            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
           />
         </div>
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-white/70">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
             <Loader2 className="animate-spin w-8 h-8 text-white" />
           </div>
           <p className="text-lg font-medium">Loading your analysis history...</p>
@@ -137,7 +123,7 @@ export default function History({ userId }: Props) {
         </div>
       ) : history.length === 0 ? (
         <div className="text-center py-16">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10">
             <span className="text-4xl">📭</span>
           </div>
           <p className="text-white/60 text-lg font-medium mb-2">No entries found</p>
@@ -162,15 +148,15 @@ export default function History({ userId }: Props) {
                       <img
                         src={signedUrls[entry.id] ?? '/placeholder-image.png'}
                         alt="Food"
-                        className="w-20 h-20 object-cover rounded-xl border-2 border-white/20 shadow-lg group-hover:border-purple-400/50 transition-all duration-300"
+                        className="w-20 h-20 object-cover rounded-xl border-2 border-white/20 shadow-lg group-hover:border-emerald-400/50 transition-all duration-300"
                       />
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-full flex items-center justify-center shadow-md">
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center shadow-md">
                         <Sparkles className="w-3 h-3 text-white" />
                       </div>
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                        <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                           {entry.result_summary}g
                         </p>
                         <span className="bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-sm px-3 py-1 rounded-full font-medium">
@@ -187,12 +173,13 @@ export default function History({ userId }: Props) {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : entry.id)}
-                      className="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 text-blue-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 group/btn"
+                      className="bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/30 text-cyan-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 group/btn"
                     >
-                      {isExpanded ? 
-                        <ChevronUp size={20} className="group-hover/btn:scale-110 transition-transform" /> : 
+                      {isExpanded ? (
+                        <ChevronUp size={20} className="group-hover/btn:scale-110 transition-transform" />
+                      ) : (
                         <ChevronDown size={20} className="group-hover/btn:scale-110 transition-transform" />
-                      }
+                      )}
                     </button>
 
                     <button
@@ -213,7 +200,7 @@ export default function History({ userId }: Props) {
                   <div className="mt-6 pt-6 border-t border-white/10">
                     <div className="bg-black/20 border border-white/10 rounded-xl p-5">
                       <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                        <div className="w-6 h-6 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-lg flex items-center justify-center">
                           <span className="text-xs">📊</span>
                         </div>
                         Detailed Analysis

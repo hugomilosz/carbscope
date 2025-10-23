@@ -101,25 +101,25 @@ export default function Stats({ userId }: Props) {
   }
 
   return (
-    <div className="bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl mb-8">
+    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl">
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-xl flex items-center justify-center shadow-lg">
+        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.3)]">
           <BarChart3 className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
             Your Stats
           </h2>
-          <p className="text-white/70">A look at your recent activity</p>
+          <p className="text-gray-400">A look at your recent activity</p>
         </div>
       </div>
 
       {/* Main Stats Grid */}
       <div className="grid md:grid-cols-3 gap-6 mb-8 text-white text-center">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-          <TrendingUp className="w-8 h-8 mx-auto mb-2 text-cyan-300" />
-          <p className="text-3xl font-bold">{averageDaily}g</p>
-          <p className="text-white/60 text-sm">Avg. Daily Carbs</p>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-emerald-500/10 transition">
+          <TrendingUp className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
+          <p className="text-3xl font-bold text-white">{averageDaily}g</p>
+          <p className="text-gray-400 text-sm">Avg. Daily Carbs</p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
           <BarChart3 className="w-8 h-8 mx-auto mb-2 text-blue-300" />
@@ -136,7 +136,7 @@ export default function Stats({ userId }: Props) {
       {/* Chart */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Last 7 Days Trend</h3>
-        <div className="h-64 bg-black/20 p-4 rounded-xl border border-white/10">
+        <div className="h-64 bg-emerald-400/5 p-4 rounded-xl border border-white/10">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />

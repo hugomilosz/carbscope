@@ -6,7 +6,7 @@ import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: User | null
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string, options?: { captchaToken?: string }) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -30,8 +30,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+  async function signIn(
+    email: string,
+    password: string,
+    options?: { captchaToken?: string }
+  ) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: options?.captchaToken ? { captchaToken: options.captchaToken } : undefined,
+    })
     if (error) throw error
   }
 
