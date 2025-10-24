@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest --watch --config jest.config.ts"
+    "test": "jest --config jest.config.ts"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.14.0",

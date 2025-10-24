@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Loader2, Upload, Camera, Image, CheckCircle, AlertCircle } from 'lucide-react'
+import NextImage from 'next/image'
+import { Loader2, Upload, Camera, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
 
 type Props = {
   userId: string
@@ -21,16 +22,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (!file) return
-    if (isGuest) {
-      const reader = new FileReader()
-      reader.onloadend = () => onUploadComplete?.(reader.result as string)
-      reader.readAsDataURL(file)
-    } else {
-      uploadImage(file)
-    }
-  }, [file, isGuest])
+  
 
   function processFile(file: File | null) {
     setError(null)
@@ -42,7 +34,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
     setPreview(URL.createObjectURL(file))
   }
 
-  async function uploadImage(file: File) {
+  const uploadImage = useCallback(async (file: File) => {
     setLoading(true)
     setError(null)
     setUploadProgress(0)
@@ -59,14 +51,26 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
       setUploadProgress(100)
       setUploadedUrl(filePath)
       onUploadComplete?.(filePath)
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearInterval(progressInterval)
-      setError(err.message || 'Upload failed')
+      const message = err instanceof Error ? err.message : String(err)
+      setError(message || 'Upload failed')
     } finally {
       setLoading(false)
       setTimeout(() => setUploadProgress(0), 2000)
     }
-  }
+  }, [supabase, userId, onUploadComplete])
+
+  useEffect(() => {
+    if (!file) return
+    if (isGuest) {
+      const reader = new FileReader()
+      reader.onloadend = () => onUploadComplete?.(reader.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      uploadImage(file)
+    }
+  }, [file, isGuest, uploadImage, onUploadComplete])
 
   return (
     <div className="space-y-6">
@@ -111,7 +115,14 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
         {preview ? (
           <div className="space-y-4">
             <div className="relative inline-block">
-              <img src={preview} alt="Preview" className="max-w-full max-h-64 rounded-xl border border-white/10 shadow-lg" />
+              <NextImage
+                src={preview}
+                alt="Preview"
+                width={256}
+                height={256}
+                unoptimized
+                className="max-w-full max-h-64 rounded-xl border border-white/10 shadow-lg object-contain"
+              />
               <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center shadow-lg">
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
@@ -124,7 +135,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
               {dragOver ? (
                 <Upload className="w-10 h-10 text-cyan-400 animate-bounce" />
               ) : (
-                <Image className="w-10 h-10 text-white/60" />
+                <ImageIcon className="w-10 h-10 text-white/60" aria-hidden="true" />
               )}
             </div>
             <p className="text-white font-medium text-lg">Choose your food image</p>

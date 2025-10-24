@@ -81,9 +81,10 @@ export default function Home() {
           result_details: data.details,
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearInterval(progressInterval)
-      setError(err.message || 'Failed to analyse image')
+      const message = err instanceof Error ? err.message : String(err)
+      setError(message || 'Failed to analyse image')
     } finally {
       setLoading(false)
       setTimeout(() => setUploadProgress(0), 1000)
@@ -140,22 +141,28 @@ export default function Home() {
       <div className="relative z-10 max-w-4xl mx-auto py-12 px-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-10">
-          {user ? (
-            <button
-              onClick={() => signOut()}
-              className="text-sm bg-white/10 border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition"
-            >
-              Logout
-            </button>
-          ) : (
-            <button
-              onClick={handleGoBack}
-              className="flex items-center gap-2 text-sm bg-white/10 border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Login
-            </button>
-          )}
+          <div>
+            {user ? (
+              <button
+                onClick={() => signOut()}
+                className="text-sm bg-white/10 border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition"
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={handleGoBack}
+                className="flex items-center gap-2 text-sm bg-white/10 border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Login
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <ThemeSwitcher />
+          </div>
         </div>
 
         {/* Hero */}

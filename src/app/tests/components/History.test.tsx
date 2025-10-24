@@ -13,6 +13,19 @@ const waitForDataLoad = async () => {
   )
 }
 
+type MockAnalysisEntry = {
+  id: string;
+  image_url: string;
+  result_summary: string;
+  result_details: string;
+  created_at: string;
+};
+
+type MockQueryResult = {
+  data: MockAnalysisEntry[] | null;
+  error: { message: string } | null;
+};
+
 describe('History component', () => {
   const mockSupabaseFrom = jest.fn()
   const mockCreateSignedUrl = jest.fn()
@@ -32,10 +45,12 @@ describe('History component', () => {
     mockGte.mockReturnValue({ lt: mockLt })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            mockQueryPromise.then(onFulfilled, onRejected),
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) =>  mockQueryPromise.then(onFulfilled, onRejected),
         })
-            mockEq.mockReturnValue({ order: mockOrder })
+    mockEq.mockReturnValue({ order: mockOrder })
     mockSelect.mockReturnValue({ eq: mockEq })
     mockDelete.mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) })
     mockCreateSignedUrl.mockResolvedValue({ data: { signedUrl: 'signed-url' } })
@@ -65,11 +80,13 @@ describe('History component', () => {
       result_details: 'Details',
       created_at: new Date().toISOString(),
     }]
-    const promise = Promise.resolve({ data, error: null })
+    const promise: Promise<MockQueryResult> = Promise.resolve({ data, error: null })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            promise.then(onFulfilled, onRejected),
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => promise.then(onFulfilled, onRejected),
         })
 
     render(<History userId={userId} />)
@@ -90,8 +107,10 @@ describe('History component', () => {
     const promise = Promise.resolve({ data, error: null })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            promise.then(onFulfilled, onRejected),
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => promise.then(onFulfilled, onRejected),
         })
 
     render(<History userId={userId} />)
@@ -116,9 +135,11 @@ describe('History component', () => {
     const promise = Promise.resolve({ data, error: null })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            promise.then(onFulfilled, onRejected),
-        })
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => promise.then(onFulfilled, onRejected),
+    })
     mockDelete.mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) })
     window.confirm = jest.fn(() => true)
 
@@ -128,9 +149,11 @@ describe('History component', () => {
     const refetchPromise = Promise.resolve({ data: [], error: null })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            refetchPromise.then(onFulfilled, onRejected),
-        })
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => refetchPromise.then(onFulfilled, onRejected),
+    })
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete entry' }))
     await waitFor(() => expect(screen.getByText(/No entries found/i)).toBeInTheDocument())
@@ -141,8 +164,10 @@ describe('History component', () => {
     const promise = Promise.resolve({ data: null, error })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-            promise.then(onFulfilled, onRejected),
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => promise.then(onFulfilled, onRejected),
         })
 
     render(<History userId={userId} />)
@@ -183,8 +208,10 @@ describe('History component', () => {
     const promise = Promise.resolve({ data, error: null })
     mockOrder.mockReturnValue({
         gte: mockGte,
-        then: (onFulfilled: (rows: any) => void, onRejected?: (reason?: any) => void) =>
-        promise.then(onFulfilled, onRejected),
+        then: (
+            onFulfilled: (result: MockQueryResult) => void,
+            onRejected?: (reason?: unknown) => void
+        ) => promise.then(onFulfilled, onRejected),
     })
     window.confirm = jest.fn(() => false)
 
