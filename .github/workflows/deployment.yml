@@ -31,7 +31,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm run test -- --shard=${{ matrix.shard }}/${{ strategy.matrix.shard.length }}
+        run: npm run test -- --shard=${{ matrix.shard }}/4
 
       - name: Build
         if: ${{ matrix.shard == 1 }}
