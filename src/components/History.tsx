@@ -100,6 +100,7 @@ export default function History({ userId }: Props) {
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
           <input
             type="date"
+            aria-label="Filter by date" // <-- ADD THIS LINE
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
             className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
@@ -173,6 +174,7 @@ export default function History({ userId }: Props) {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : entry.id)}
+                      aria-label={isExpanded ? 'Collapse entry' : 'Expand entry'}
                       className="bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/30 text-cyan-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 group/btn"
                     >
                       {isExpanded ? (
@@ -185,6 +187,7 @@ export default function History({ userId }: Props) {
                     <button
                       onClick={() => deleteEntry(entry.id)}
                       disabled={deletingId === entry.id}
+                      aria-label="Delete entry"
                       className="bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 p-3 rounded-xl transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed group/btn"
                     >
                       {deletingId === entry.id ? (

@@ -81,6 +81,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
 
       {/* Upload Area */}
       <div
+        data-testid="drop-area"
         className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer group ${
           dragOver
             ? 'border-cyan-400 bg-cyan-400/10 scale-105'
@@ -98,7 +99,14 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
         onDragLeave={(e) => { e.preventDefault(); setDragOver(false) }}
         onClick={() => fileInputRef.current?.click()}
       >
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => processFile(e.target.files?.[0] ?? null)} className="hidden" />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={(e) => processFile(e.target.files?.[0] ?? null)}
+          className="hidden"
+          data-testid="file-input"
+        />
 
         {preview ? (
           <div className="space-y-4">
