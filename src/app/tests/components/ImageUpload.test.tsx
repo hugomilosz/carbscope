@@ -115,7 +115,7 @@ describe('ImageUpload component', () => {
 
   it('shows an error when file is too large', async () => {
     render(<ImageUpload userId="user123" />)
-    // Create a "large" fake file (size 15MB)
+    // Create a large file (size 15MB)
     const largeFile = new File(['x'.repeat(15 * 1024 * 1024)], 'big.png', { type: 'image/png' })
 
     const input = screen.getByTestId('file-input')
@@ -132,9 +132,8 @@ describe('ImageUpload component', () => {
     const imageFile = new File(['mock'], 'meal.png', { type: 'image/png' })
     const dropArea = screen.getByText(/Choose your food image/i).closest('div')!
 
-    // Simulate drag over
+    // Simulate drag over and drop
     fireEvent.dragOver(dropArea)
-    // Simulate drop
     fireEvent.drop(dropArea, { dataTransfer: { files: [imageFile] } })
 
     await waitFor(() =>
