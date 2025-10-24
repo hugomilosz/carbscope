@@ -7,7 +7,7 @@ import ImageUpload from '../components/ImageUpload'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
 import Stats from '../components/Stats'
-import { Zap, TrendingUp, Shield, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
+import { Zap, TrendingUp, Shield, ArrowRight, Loader2, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
 
 const supabase = createClientComponentClient()
@@ -16,7 +16,7 @@ export default function Home() {
   const { user, signOut } = useAuth()
   const [isGuest, setIsGuest] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
-  const [analysis, setAnalysis] = useState<{ summary: string; details: string } | null>(null)
+  const [analysis, setAnalysis] = useState<{ summary: string; details: string; items: { name: string; carbs: number }[]} | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -88,6 +88,47 @@ export default function Home() {
       setTimeout(() => setUploadProgress(0), 1000)
     }
   }
+
+  function CarbBreakdown({ items }: { items: { name: string; carbs: number }[] }) {
+    if (!items || items.length === 0) return null
+
+    return (
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+        <h3 className="text-lg font-semibold mb-3">Carbohydrate Breakdown</h3>
+        <ul className="space-y-2">
+          {items.map((item, i) => (
+            <li key={i} className="flex justify-between">
+              <span className="text-gray-200 capitalize">{item.name}</span>
+              <span className="font-semibold text-emerald-300">{item.carbs}g</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  function FullAnalysis({ details }: { details: string }) {
+    const [expanded, setExpanded] = useState(false)
+
+    return (
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center justify-between w-full text-left font-semibold text-emerald-300"
+        >
+          <span>{expanded ? 'Hide Full AI Reasoning' : 'View Full AI Reasoning'}</span>
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+
+        {expanded && (
+          <div className="mt-4 text-gray-200 whitespace-pre-wrap text-sm">
+            {details}
+          </div>
+        )}
+      </div>
+    )
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 relative text-white">
@@ -230,12 +271,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold mb-3">Detailed Analysis</h3>
-                <p className="text-gray-200 whitespace-pre-wrap">{analysis.details}</p>
-              </div>
+              <CarbBreakdown items={analysis.items} />
+              <FullAnalysis details={analysis.details} />
             </div>
           )}
+
         </div>
 
         {/* Stats & History */}
