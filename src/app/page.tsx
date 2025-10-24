@@ -9,6 +9,7 @@ import History from '../components/History'
 import Stats from '../components/Stats'
 import { Zap, TrendingUp, Shield, ArrowRight, Loader2, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
+import ThemeSwitcher from '../components/ThemeSwitcher'
 
 const supabase = createClientComponentClient()
 
