@@ -63,6 +63,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
 
   useEffect(() => {
     if (!file) return
+
     if (isGuest) {
       const reader = new FileReader()
       reader.onloadend = () => onUploadComplete?.(reader.result as string)
@@ -70,7 +71,8 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
     } else {
       uploadImage(file)
     }
-  }, [file, isGuest, uploadImage, onUploadComplete])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file, isGuest])
 
   return (
     <div className="space-y-6">

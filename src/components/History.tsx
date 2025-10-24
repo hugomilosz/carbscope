@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
-import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 type Analysis = {
@@ -91,21 +91,30 @@ export default function History({ userId }: Props) {
           </div>
           <div>
             <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              📚 Your History
+              Your History
             </h2>
-            <p className="text-white/70">Track your nutritional journey</p>
+            <p className="text-white/70">View your past uploads</p>
           </div>
         </div>
 
         <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" />
           <input
             type="date"
-            aria-label="Filter by date" // <-- ADD THIS LINE
+            aria-label="Filter by date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
+            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
           />
+          {filterDate && (
+            <button
+              onClick={() => setFilterDate('')}
+              aria-label="Clear date filter"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors p-1 rounded-full"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
