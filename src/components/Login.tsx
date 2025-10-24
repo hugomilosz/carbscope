@@ -31,8 +31,9 @@ export default function Login({ onGuestLogin }: { onGuestLogin: () => void }) {
     setLoading(true)
     try {
       await signIn(email, password, { captchaToken })
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      setError(message || 'Sign in failed')
     } finally {
       setLoading(false)
       // Reset CAPTCHA after each attempt
@@ -46,8 +47,9 @@ export default function Login({ onGuestLogin }: { onGuestLogin: () => void }) {
     setGoogleLoading(true)
     try {
       await signInWithGoogle()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      setError(message || 'Sign in failed')
     } finally {
       setGoogleLoading(false)
     }

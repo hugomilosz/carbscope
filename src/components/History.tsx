@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import NextImage from 'next/image'
 import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
@@ -27,7 +28,7 @@ export default function History({ userId }: Props) {
   const [filterDate, setFilterDate] = useState<string>('')
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
 
-  async function fetchHistory() {
+  const fetchHistory = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -63,11 +64,11 @@ export default function History({ userId }: Props) {
     }
 
     setLoading(false)
-  }
+  }, [supabase, userId, filterDate])
 
   useEffect(() => {
     if (userId) fetchHistory()
-  }, [userId, filterDate])
+  }, [userId, fetchHistory])
 
   async function deleteEntry(id: string) {
     const confirmed = confirm('Are you sure you want to delete this entry?')
@@ -146,9 +147,12 @@ export default function History({ userId }: Props) {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-6 items-center">
                     <div className="relative">
-                      <img
+                      <NextImage
                         src={signedUrls[entry.id] ?? '/placeholder-image.png'}
-                        alt="Food"
+                        alt="Analyzed food image"
+                        width={80}
+                        height={80}
+                        unoptimized
                         className="w-20 h-20 object-cover rounded-xl border-2 border-white/20 shadow-lg group-hover:border-emerald-400/50 transition-all duration-300"
                       />
                       <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center shadow-md">

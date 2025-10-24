@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { Loader2, TrendingUp, BarChart3, CalendarCheck } from 'lucide-react'
@@ -27,7 +27,7 @@ export default function Stats({ userId }: Props) {
   const [highestDay, setHighestDay] = useState<{ date: string; total: number } | null>(null)
   const [loading, setLoading] = useState(true)
 
-  async function fetchStats() {
+  const fetchStats = useCallback(async () => {
     if (!userId) return
     setLoading(true)
 
@@ -81,11 +81,11 @@ export default function Stats({ userId }: Props) {
     setTotalEntries(data.length)
     setHighestDay(highest)
     setLoading(false)
-  }
+  }, [userId, supabase])
 
   useEffect(() => {
     fetchStats()
-  }, [userId])
+  }, [fetchStats])
 
   if (loading) {
     return (
