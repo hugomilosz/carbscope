@@ -1,25 +1,25 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import "./globals.css"
-import { AuthProvider } from "../components/AuthProvider"
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from '../components/AuthProvider'
 import { ThemeProvider } from 'next-themes'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  display: 'swap',
 })
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: "CarbScope AI – Carbohydrate Estimator",
-  description: "Upload a food image to estimate carbohydrate content using AI.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: 'CarbScope AI – Carbohydrate Estimator',
+  description: 'Upload a food image to estimate carbohydrate content using AI.',
+  icons: [{ rel: 'icon', url: '/favicon.ico' }],
 }
 
 export default function RootLayout({
@@ -28,9 +28,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen bg-gray-50 text-gray-900 overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen 
+          bg-gray-50 text-gray-900 
+          dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 dark:text-white 
+          overflow-x-hidden transition-colors duration-300`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>{children}</AuthProvider>
