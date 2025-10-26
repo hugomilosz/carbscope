@@ -1,8 +1,10 @@
-# 🍔🔬 CarbScope - Carbohydrate Estimator from Food Images using Groq + LLaMA 4
+# CarbScope - Carbohydrate Estimator from Food Images using Groq + LLaMA 4
 
-**CarbScope** is a web application that estimates the carbohydrate content of food items from an image using **Groq API** with the **Meta Llama 4 Scout** model. Built with Next.js and Supabase, it allows users to upload food images, receive a total carbohydrate estimate and itemised background, and track their analysis history.
+**CarbScope** is a web application that estimates the carbohydrate content of food items from an image. Built with Next.js and Supabase, it uses the **Groq API** with the **Meta Llama 4 Scout** and **Llama 3 70b** models to cross-check the results to provide a more accurate, averaged carbohydrate count.
 
-🔗 Live Demo: [https://carbscope-yqcl.vercel.app](https://carbscope-yqcl.vercel.app)
+Users can upload food images, receive a detailed carbohydrate analysis, track their history, and view a personal statistics dashboard.
+
+🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope-yqcl.vercel.app)
 
 https://github.com/user-attachments/assets/5ebfcaac-c401-4cb2-9de7-286abb1a422d
 
