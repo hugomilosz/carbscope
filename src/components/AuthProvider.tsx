@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         redirectTo: typeof window !== 'undefined'
           ? `${window.location.origin}`
-          : 'https://carbscope-yqcl.vercel.app'
+          : 'https://carbscope.vercel.app'
       }
     })
     if (error) throw error
