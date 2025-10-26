@@ -84,7 +84,7 @@ export default function History({ userId }: Props) {
   return (
     <div className="relative">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-8">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.3)]">
             <TrendingUp className="w-6 h-6 text-white" />
@@ -97,15 +97,14 @@ export default function History({ userId }: Props) {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative w-full md:w-auto">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" />
           <input
             type="date"
             aria-label="Filter by date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"
-          />
+            className="w-full md:w-auto bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"          />
           {filterDate && (
             <button
               onClick={() => setFilterDate('')}
@@ -153,9 +152,9 @@ export default function History({ userId }: Props) {
                   animation: 'fadeInUp 0.6s ease-out forwards'
                 }}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                   <div className="flex gap-6 items-center">
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                       <NextImage
                         src={signedUrls[entry.id] ?? '/placeholder-image.png'}
                         alt="Analyzed food image"
@@ -184,7 +183,7 @@ export default function History({ userId }: Props) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 self-end md:self-auto">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : entry.id)}
                       aria-label={isExpanded ? 'Collapse entry' : 'Expand entry'}

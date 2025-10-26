@@ -9,7 +9,8 @@ import History from '../components/History'
 import Stats from '../components/Stats'
 import { Zap, TrendingUp, Shield, ArrowRight, Loader2, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
-import ThemeSwitcher from '../components/ThemeSwitcher'
+// import ThemeSwitcher from '../components/ThemeSwitcher'
+import ReactMarkdown from 'react-markdown'
 
 const supabase = createClientComponentClient()
 
@@ -113,27 +114,29 @@ export default function Home() {
     const [expanded, setExpanded] = useState(false)
 
     return (
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <div className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-between w-full text-left font-semibold text-emerald-300"
+          className="flex items-center justify-between w-full text-left font-semibold text-emerald-600 dark:text-emerald-300"
         >
           <span>{expanded ? 'Hide Full AI Reasoning' : 'View Full AI Reasoning'}</span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
         {expanded && (
-          <div className="mt-4 text-gray-200 whitespace-pre-wrap text-sm">
-            {details}
+          <div className="mt-4 text-sm">
+            {/* We use `prose` for nice default Markdown styling */}
+            <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-200">
+              <ReactMarkdown>{details}</ReactMarkdown>
+            </div>
           </div>
         )}
       </div>
     )
   }
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 relative text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 relative text-white overflow-x-hidden">
       {/* Soft background accent */}
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-tr from-emerald-400/20 to-cyan-400/20 rounded-full blur-3xl" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,255,255,0.05),transparent_70%)]" />
@@ -160,9 +163,9 @@ export default function Home() {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <ThemeSwitcher />
-          </div>
+          </div> */}
         </div>
 
         {/* Hero */}
