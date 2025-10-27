@@ -97,14 +97,14 @@ export default function History({ userId }: Props) {
           </div>
         </div>
 
-        <div className="relative w-full md:w-auto">
+        <div className="relative w-full md:w-auto min-w-0">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" />
           <input
             type="date"
             aria-label="Filter by date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full md:w-auto bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"          />
+            className="w-full md:w-auto min-w-0 bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all duration-300"          />
           {filterDate && (
             <button
               onClick={() => setFilterDate('')}
@@ -152,8 +152,7 @@ export default function History({ userId }: Props) {
                   animation: 'fadeInUp 0.6s ease-out forwards'
                 }}
               >
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                  <div className="flex gap-6 items-center">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">                  <div className="flex gap-6 items-center">
                     <div className="relative flex-shrink-0">
                       <NextImage
                         src={signedUrls[entry.id] ?? '/placeholder-image.png'}
@@ -168,7 +167,7 @@ export default function History({ userId }: Props) {
                       </div>
                     </div>
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
                         <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                           {entry.result_summary}g
                         </p>
