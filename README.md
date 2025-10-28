@@ -6,7 +6,7 @@ Users can upload food images, receive a detailed carbohydrate analysis, track th
 
 🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope-yqcl.vercel.app)
 
-https://github.com/user-attachments/assets/5ebfcaac-c401-4cb2-9de7-286abb1a422d
+https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
 
 ---
 
