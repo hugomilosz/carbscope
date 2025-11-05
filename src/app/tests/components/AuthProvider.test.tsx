@@ -128,10 +128,190 @@ describe('AuthProvider', () => {
       </AuthProvider>,
     )
 
-    // Wait for the useEffect to run getSession
+    // Wait for the useEffect
     await waitFor(() => {
       expect(supabase.auth.getSession).toHaveBeenCalled()
       expect(screen.getByTestId('user-display')).toHaveTextContent('No User')
     })
+  })
+
+  it('initialises with a user if a session exists', async () => {
+    ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+      data: { session: mockSession },
+      error: null,
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    // Wait for useEffect and state update
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent(
+        `User: ${mockUser.id}`,
+      )
+    })
+  })
+
+  it('updates user state when onAuthStateChange fires a SIGNED_IN event', async () => {
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    // Ensure initial state is 'No User;
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent('No User')
+    })
+
+    act(() => {
+      onAuthStateChangeCallback('SIGNED_IN', mockSession)
+    })
+
+    // Wait for state to update
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent(
+        `User: ${mockUser.id}`,
+      )
+    })
+  })
+
+  it('updates user state when onAuthStateChange fires a SIGNED_OUT event', async () => {
+    ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+      data: { session: mockSession },
+      error: null,
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent(
+        `User: ${mockUser.id}`,
+      )
+    })
+
+    // 3. Simulate SIGNED_OUT event
+    act(() => {
+      onAuthStateChangeCallback('SIGNED_OUT', null)
+    })
+
+    // Wait for state to update
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent('No User')
+    })
+  })
+
+  it('calls supabase.auth.signInWithPassword on signIn', async () => {
+    ;(supabase.auth.signInWithPassword as jest.Mock).mockResolvedValue({
+      data: { session: mockSession, user: mockUser },
+      error: null,
+    })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
+
+    await waitFor(() => {
+      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+        options: { captchaToken: 'mock-token' },
+      })
+    })
+  })
+
+  it('throws error if signIn fails', async () => {
+    const errorMessage = 'Invalid login'
+    ;(supabase.auth.signInWithPassword as jest.Mock).mockResolvedValue({
+      data: { session: null, user: null },
+      error: new Error(errorMessage),
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
+
+    await waitFor(() => {
+      expect(supabase.auth.signInWithPassword).toHaveBeenCalled()
+    })
+  })
+
+  it('calls supabase.auth.signInWithOAuth on signInWithGoogle', async () => {
+    ;(supabase.auth.signInWithOAuth as jest.Mock).mockResolvedValue({
+      data: { provider: 'google', url: 'http://mock.url' },
+      error: null,
+    })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Google Sign In' }))
+
+    await waitFor(() => {
+      expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: {
+          redirectTo: 'http://localhost',
+        },
+      })
+    })
+  })
+
+  it('calls supabase.auth.signOut on signOut and sets user to null', async () => {
+    ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+      data: { session: mockSession },
+      error: null,
+    })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('user-display')).toHaveTextContent(
+        `User: ${mockUser.id}`,
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign Out' }))
+
+    await waitFor(() => {
+      expect(supabase.auth.signOut).toHaveBeenCalled()
+      expect(screen.getByTestId('user-display')).toHaveTextContent('No User')
+    })
+  })
+
+  it('unsubscribes from auth listener on unmount', async () => {
+    const { unmount } = render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(supabase.auth.onAuthStateChange).toHaveBeenCalled()
+    })
+
+    unmount()
+
+    expect(mockSubscription.subscription.unsubscribe).toHaveBeenCalledTimes(1)
   })
 })
