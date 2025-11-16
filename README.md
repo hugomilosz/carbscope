@@ -4,7 +4,7 @@
 
 Users can upload food images, receive a detailed carbohydrate analysis, track their history, and view a personal statistics dashboard.
 
-🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope-yqcl.vercel.app)
+🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope.vercel.app)
 
 https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
 
