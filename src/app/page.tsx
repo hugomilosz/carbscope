@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import Login from '../components/Login'
 import ImageUpload from '../components/ImageUpload'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
 import Stats from '../components/Stats'
-import { Zap, TrendingUp, Shield, ArrowRight, Loader2, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react'
+import { Zap, Shield, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
-// import ThemeSwitcher from '../components/ThemeSwitcher'
-import ReactMarkdown from 'react-markdown'
+import AnalysisResultCard from '@/components/AnalysisResultsCard'
+import { AnalysisResult } from '@/lib/types'
 
 const supabase = createClientComponentClient()
 
@@ -18,12 +18,17 @@ export default function Home() {
   const { user, signOut } = useAuth()
   const [isGuest, setIsGuest] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
-  const [analysis, setAnalysis] = useState<{ summary: string; details: string; items: { name: string; carbs: number }[]} | null>(null)
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null) 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [userContext, setUserContext] = useState('')
   const [mealSize, setMealSize] = useState('standard')
+
+  const handleUploadComplete = useCallback((url: string) => {
+    setUploadedImageUrl(url)
+    setAnalysis(null)
+  }, [])
 
   if (!user && !isGuest) {
     return <Login onGuestLogin={() => setIsGuest(true)} />
@@ -33,15 +38,17 @@ export default function Home() {
     setIsGuest(false)
     setUploadedImageUrl(null)
     setAnalysis(null)
+    setUserContext('')
   }
 
-  async function analyzeImage() {
+  async function analyseImage() {
     if (!uploadedImageUrl) return
     setLoading(true)
     setError(null)
+    
     const progressInterval = setInterval(() => {
-      setUploadProgress(prev => Math.min(prev + Math.random() * 15, 85))
-    }, 300)
+      setUploadProgress(prev => Math.min(prev + Math.random() * 10, 90))
+    }, 500)
 
     try {
       let imageUrlForApi: string
@@ -68,6 +75,7 @@ export default function Home() {
       })
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+      
       const data = await res.json()
 
       clearInterval(progressInterval)
@@ -75,11 +83,12 @@ export default function Home() {
       setAnalysis(data)
 
       if (user) {
+        // Save to DB
         await supabase.from('analyses').insert({
           user_id: user.id,
           image_url: uploadedImageUrl,
-          result_summary: data.summary,
-          result_details: data.details,
+          result_summary: data.totalCarbs.toString(), 
+          result_details: JSON.stringify(data.items), 
         })
       }
     } catch (err: unknown) {
@@ -92,56 +101,13 @@ export default function Home() {
     }
   }
 
-  function CarbBreakdown({ items }: { items: { name: string; carbs: number }[] }) {
-    if (!items || items.length === 0) return null
-
-    return (
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h3 className="text-lg font-semibold mb-3">Carbohydrate Breakdown</h3>
-        <ul className="space-y-2">
-          {items.map((item, i) => (
-            <li key={i} className="flex justify-between">
-              <span className="text-gray-200 capitalize">{item.name}</span>
-              <span className="font-semibold text-emerald-300">{item.carbs}g</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-
-  function FullAnalysis({ details }: { details: string }) {
-    const [expanded, setExpanded] = useState(false)
-
-    return (
-      <div className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-between w-full text-left font-semibold text-emerald-600 dark:text-emerald-300"
-        >
-          <span>{expanded ? 'Hide Full AI Reasoning' : 'View Full AI Reasoning'}</span>
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
-
-        {expanded && (
-          <div className="mt-4 text-sm">
-            {/* We use `prose` for nice default Markdown styling */}
-            <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-200">
-              <ReactMarkdown>{details}</ReactMarkdown>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 relative text-white overflow-x-hidden">
-      {/* Soft background accent */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-tr from-emerald-400/20 to-cyan-400/20 rounded-full blur-3xl" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,255,255,0.05),transparent_70%)]" />
-
+      {/* Background */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-tr from-emerald-400/20 to-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,255,255,0.05),transparent_70%)] pointer-events-none" />
       <div className="relative z-10 max-w-4xl mx-auto py-12 px-4">
+        
         {/* Header */}
         <div className="flex justify-between items-center mb-10">
           <div>
@@ -162,13 +128,9 @@ export default function Home() {
               </button>
             )}
           </div>
-
-          {/* <div className="flex items-center gap-4">
-            <ThemeSwitcher />
-          </div> */}
         </div>
 
-        {/* Hero */}
+        {/* Main Section */}
         <div className="text-center mb-12">
           <h1 className="text-6xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-3">
             CarbScope
@@ -178,18 +140,15 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Card */}
+        {/* Main Card */}
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl">
           <ImageUpload
             userId={user ? user.id : 'guest'}
             isGuest={isGuest}
-            onUploadComplete={(url) => {
-              setUploadedImageUrl(url)
-              setAnalysis(null)
-            }}
+            onUploadComplete={handleUploadComplete}
           />
 
-          {/* Meal size selector */}
+          {/* Portion Size Selector */}
           <div className="grid md:grid-cols-3 gap-4 mt-6">
             {['small', 'standard', 'large'].map(size => {
               const active = mealSize === size
@@ -211,35 +170,35 @@ export default function Home() {
                   <div className="text-2xl mb-2">
                     {size === 'small' ? '🥄' : size === 'standard' ? '🍽️' : '🍱'}
                   </div>
-                  <p className="capitalize text-sm">{size}</p>
+                  <p className="capitalize text-sm text-gray-300">{size}</p>
                 </label>
               )
             })}
           </div>
 
-          {/* Context Input */}
+          {/* User Context */}
           <div className="mt-6">
             <textarea
               value={userContext}
               onChange={(e) => setUserContext(e.target.value)}
-              placeholder="E.g. 'Grilled chicken with rice and beans.'"
+              placeholder="E.g. 'Grilled chicken with rice and beans - I didn't eat the bread.'"
               rows={3}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl p-4 resize-none"
+              className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl p-4 resize-none focus:outline-none focus:border-emerald-400/50 transition-colors"
             />
           </div>
 
-          {/* Analyse Button */}
+          {/* Action Button */}
           {uploadedImageUrl && (
             <div className="mt-6">
               <button
-                onClick={analyzeImage}
+                onClick={analyseImage}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold py-4 px-8 rounded-2xl transition-all transform hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-3"
+                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold py-4 px-8 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    Estimating...
+                    Analysing Food...
                   </>
                 ) : (
                   <>
@@ -250,10 +209,11 @@ export default function Home() {
                 )}
               </button>
 
+              {/* Progress Bar */}
               {loading && (
-                <div className="mt-3 bg-white/10 rounded-full h-2">
+                <div className="mt-4 bg-white/10 rounded-full h-2 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all"
+                    className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all duration-300 ease-out"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -261,50 +221,39 @@ export default function Home() {
             </div>
           )}
 
-          {/* Error */}
+          {/* Error Display */}
           {error && (
-            <div className="mt-6 bg-red-500/20 border border-red-400/30 text-red-200 rounded-xl p-4">
+            <div className="mt-6 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl p-4 flex items-center gap-3">
+              <Shield className="w-5 h-5 text-red-400" />
               {error}
             </div>
           )}
 
-          {/* Analysis */}
+          {/* Results Section */}
           {analysis && (
-            <div className="mt-8 space-y-6">
-              <div className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-400/30 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <TrendingUp className="w-6 h-6 text-emerald-400" />
-                  <h2 className="text-xl font-semibold">Analysis Complete</h2>
-                </div>
-                <div className="text-center">
-                  <div className="text-5xl font-bold text-emerald-300 mb-2">{analysis.summary}g</div>
-                  <p className="text-gray-300">Total Carbohydrates</p>
-                </div>
-              </div>
-
-              <CarbBreakdown items={analysis.items} />
-              <FullAnalysis details={analysis.details} />
+            <div className="mt-12 pt-10 border-t border-white/10 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <AnalysisResultCard analysis={analysis} />
             </div>
           )}
 
         </div>
 
-        {/* Stats & History */}
+        {/* Stats & History (Only for Logged in Users) */}
         {user && (
-          <>
+          <div className="animate-in fade-in delay-200 duration-500">
             <Stats userId={user.id} />
             <div className="mt-8 bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl">
               <History userId={user.id} />
             </div>
-          </>
+          </div>
         )}
 
         {/* Footer */}
-        <div className="text-center mt-10 text-gray-400 text-sm space-y-2">
-          <p>👨‍💻 Developed by Hugo Miloszewski • 🚀 Powered by Groq API & Llama 4 Scout</p>
-          <div className="flex justify-center items-center gap-2 text-red-300 bg-red-500/10 border border-red-400/30 rounded-full px-4 py-2 inline-flex">
-            <Shield className="w-4 h-4" />
-            For estimation only — not for medical use
+        <div className="text-center mt-12 text-gray-500 text-sm space-y-3">
+          <p>👨‍💻 Developed by Hugo Miloszewski • 🚀 Powered by Groq Llama 4 (Scout + Maverick)</p>
+          <div className="inline-flex items-center gap-2 text-rose-300/80 bg-rose-500/10 border border-rose-500/20 rounded-full px-4 py-1.5">
+            <Shield className="w-3 h-3" />
+            <span>For estimation only — not for medical use</span>
           </div>
         </div>
       </div>
