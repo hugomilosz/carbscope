@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { Loader2, Upload, Camera, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
@@ -22,28 +22,45 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function processFile(file: File | null) {
+  function processFile(selectedFile: File | null) {
     setError(null)
     setUploadedUrl(null)
-    if (!file) return
-    if (!file.type.startsWith('image/')) return setError('Please select a valid image file')
-    if (file.size > 10 * 1024 * 1024) return setError('File size must be less than 10MB')
-    setFile(file)
-    setPreview(URL.createObjectURL(file))
+    
+    if (!selectedFile) return
+    if (!selectedFile.type.startsWith('image/')) return setError('Please select a valid image file')
+    if (selectedFile.size > 10 * 1024 * 1024) return setError('File size must be less than 10MB')
+    
+    setFile(selectedFile)
+    setPreview(URL.createObjectURL(selectedFile))
+    uploadImage(selectedFile)
   }
 
-  const uploadImage = useCallback(async (file: File) => {
+  const uploadImage = useCallback(async (fileToUpload: File) => {
     setLoading(true)
     setError(null)
     setUploadProgress(0)
+
+    // Guest Mode
+    if (isGuest) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLoading(false)
+        setUploadProgress(100)
+        onUploadComplete?.(reader.result as string)
+      }
+      reader.readAsDataURL(fileToUpload)
+      return
+    }
+
     const progressInterval = setInterval(() => {
       setUploadProgress(prev => Math.min(prev + Math.random() * 15, 85))
     }, 200)
-    const filePath = `${userId}/${Date.now()}_${file.name}`
+    const filePath = `${userId}/${Date.now()}_${fileToUpload.name}`
+
     try {
       const { error: uploadError } = await supabase.storage
         .from('images')
-        .upload(filePath, file, { upsert: false })
+        .upload(filePath, fileToUpload, { upsert: false })
       if (uploadError) throw new Error(uploadError.message)
       clearInterval(progressInterval)
       setUploadProgress(100)
@@ -57,19 +74,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
       setLoading(false)
       setTimeout(() => setUploadProgress(0), 2000)
     }
-  }, [supabase, userId, onUploadComplete])
-
-  useEffect(() => {
-    if (!file) return
-
-    if (isGuest) {
-      const reader = new FileReader()
-      reader.onloadend = () => onUploadComplete?.(reader.result as string)
-      reader.readAsDataURL(file)
-    } else {
-      uploadImage(file)
-    }
-  }, [file, isGuest])
+  }, [userId, isGuest, onUploadComplete, supabase])
 
   return (
     <div className="space-y-6">
@@ -126,7 +131,14 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
             </div>
-            <p className="text-emerald-300 font-medium">Image ready for analysis!</p>
+            <div className="space-y-1">
+              <p className="text-emerald-300 font-medium">Image ready for analysis!</p>
+              {file && (
+                <p className="text-xs text-gray-400 font-mono">
+                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">

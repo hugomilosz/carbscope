@@ -31,7 +31,7 @@ const DetailsRenderer = ({ content }: { content: string }) => {
         </div>
       )
     }
-  } catch (e) {
+  } catch {
     // Old text format. Fallback to markdown below
   }
 

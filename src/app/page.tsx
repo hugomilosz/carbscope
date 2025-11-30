@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import Login from '../components/Login'
 import ImageUpload from '../components/ImageUpload'
@@ -24,6 +24,11 @@ export default function Home() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [userContext, setUserContext] = useState('')
   const [mealSize, setMealSize] = useState('standard')
+
+  const handleUploadComplete = useCallback((url: string) => {
+    setUploadedImageUrl(url)
+    setAnalysis(null)
+  }, [])
 
   if (!user && !isGuest) {
     return <Login onGuestLogin={() => setIsGuest(true)} />
@@ -140,10 +145,7 @@ export default function Home() {
           <ImageUpload
             userId={user ? user.id : 'guest'}
             isGuest={isGuest}
-            onUploadComplete={(url) => {
-              setUploadedImageUrl(url)
-              setAnalysis(null)
-            }}
+            onUploadComplete={handleUploadComplete}
           />
 
           {/* Portion Size Selector */}
