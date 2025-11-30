@@ -4,14 +4,14 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { Loader2, Upload, Camera, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
+import { AuthenticatedComponentProps } from '@/lib/types'
 
-type Props = {
-  userId: string
+interface ImageUploadProps extends AuthenticatedComponentProps {
   isGuest?: boolean
   onUploadComplete?: (url: string) => void
 }
 
-export default function ImageUpload({ userId, isGuest = false, onUploadComplete }: Props) {
+export default function ImageUpload({ userId, isGuest = false, onUploadComplete }: ImageUploadProps) {
   const supabase = createClientComponentClient()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -21,8 +21,6 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
   const [dragOver, setDragOver] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  
 
   function processFile(file: File | null) {
     setError(null)
@@ -71,7 +69,6 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
     } else {
       uploadImage(file)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file, isGuest])
 
   return (
@@ -159,7 +156,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
         </div>
       )}
 
-      {/* Success / Error */}
+      {/* Success/Error */}
       {uploadedUrl && !loading && (
         <div className="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle className="w-6 h-6 text-emerald-400" />

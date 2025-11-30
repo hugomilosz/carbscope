@@ -17,6 +17,7 @@
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "@vercel/analytics": "^1.5.0",
+    "groq-sdk": "^0.37.0",
     "jest-mock-extended": "^4.0.0",
     "lucide-react": "^0.511.0",
     "next": "^15.4.2",
@@ -56,13 +57,13 @@
   "main": "jest.setup.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hugomilosz/CarbohydrateGuesser.git"
+    "url": "git+https://github.com/hugomilosz/carbscope.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hugomilosz/CarbohydrateGuesser/issues"
+    "url": "https://github.com/hugomilosz/carbscope/issues"
   },
-  "homepage": "https://github.com/hugomilosz/CarbohydrateGuesser#readme"
+  "homepage": "https://github.com/hugomilosz/carbscope#readme"
 }

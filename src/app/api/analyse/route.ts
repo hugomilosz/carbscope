@@ -1,202 +1,156 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Groq from 'groq-sdk'
+import { FoodItem } from '@/lib/types'
 
-function parseGroqResponse(message: string): {
-  summary: string
-  details: string
-  items: { name: string; carbs: number }[]
-} {
-  // Extract summary
-  const summaryMatch = message.match(/\[SUMMARY\]\s*(\d+)/i)
-  const summaryTotal = summaryMatch?.[1] || '0'
-
-  // Extract [CARB BREAKDOWN]
-  const breakdownMatch = message.match(/\[CARB BREAKDOWN\]([\s\S]*?)(?:\n\d|\[|\Z)/i)
-  const breakdownSection = breakdownMatch?.[1]?.trim() || ''
-
-  const itemRegex = /-\s*([^:]+):\s*(\d+(?:\.\d+)?)\s*g?/gi
-  const items: { name: string; carbs: number }[] = []
-  let match
-  while ((match = itemRegex.exec(breakdownSection)) !== null) {
-    items.push({ name: match[1].trim(), carbs: parseFloat(match[2]) })
-  }
-
-  // Extract detailed explanation
-  const detailMatch = message.match(/\[DETAILED ANALYSIS\]([\s\S]*)/i)
-  const details = detailMatch?.[1]?.trim() || 'No detailed analysis found.'
-
-  return { summary: summaryTotal, details, items }
-}
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 export async function POST(req: NextRequest) {
   try {
     const { imageUrl, userContext, mealSize } = await req.json()
 
     if (!imageUrl) {
-      return NextResponse.json({ error: 'Missing imageUrl' }, { status: 400 })
+      return NextResponse.json({ error: 'Image URL is required' }, { status: 400 })
     }
 
-    // Fetch image from URL
-    const imageResponse = await fetch(imageUrl)
-    if (!imageResponse.ok) {
-      return NextResponse.json({ error: 'Failed to fetch image' }, { status: 400 })
-    }
-
-    const imageBuffer = await imageResponse.arrayBuffer()
-    const base64Image = Buffer.from(imageBuffer).toString('base64')
-
-    const sizeNote = mealSize ? `The portion size is: ${mealSize}.` : ''
-
-    // Groq prompt
+    // JSON Prompt
     const prompt = `
-    You are a nutritional analyst AI. Analyse the food image. Respond in **two sections** using the exact tags [SUMMARY] and [DETAILED ANALYSIS].
-
-    [SUMMARY]
-    - Compute the total carbohydrates by summing the numbers in [CARB BREAKDOWN] exactly.
-    - Output **only a plain integer number** on this line, with no other text, units, or characters.
-    - This number MUST be the exact sum of the items in [CARB BREAKDOWN].
-
-    [DETAILED ANALYSIS]
-    1. **Identified Food Items**: List and describe each visible food item.
-    2. **Carbohydrate Estimate per Item**: Explain how you estimated each food’s carbohydrate content.
-    3. **Serving Sizes**: Indicate assumed portion sizes.
-    4. **Estimation Basis**: Explain how you derived each estimate.
-    5. **Second Opinion / Factual Check**: Compare to typical nutritional data and note any uncertainties.
-    6. **Carbohydrate Breakdown**: Provide a structured list of items and their estimated carbs using the exact format below.
-
-    [CARB BREAKDOWN]
-    - Item name: number g
-    - Item name: number g
-    (continue for all items)
-
-    7. **Total Carbohydrates**: Restate the total (which must match the [SUMMARY] number) with units and a short human-readable summary.
-
-    ${sizeNote}
-    ${userContext ? `\nAdditional user-provided context: "${userContext}"` : ''}
-
-    **Formatting Rules:**
-    - Always include the [CARB BREAKDOWN] section.
-    - Ensure the sum of all carb values in [CARB BREAKDOWN] equals the [SUMMARY] total.
-    - Do not include any other text or Markdown formatting in [SUMMARY].
-    `
-
-
-    const imagePayload = {
-      type: 'image_url',
-      image_url: { url: `data:image/jpeg;base64,${base64Image}` },
-    }
-
-    // Define and query two models
-    const modelA = 'meta-llama/llama-4-scout-17b-16e-instruct'
-    const modelB = 'meta-llama/llama-4-maverick-17b-128e-instruct'
-
-    const makeGroqRequest = (model: string) =>
-      fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, imagePayload] }],
-          temperature: 0.2,
-          max_completion_tokens: 1024,
-        }),
-      })
-
-    const [responseA, responseB] = await Promise.all([
-      makeGroqRequest(modelA),
-      makeGroqRequest(modelB),
-    ])
-
-    // Process and combine responses
-    let resultA = { summary: '0', details: 'Model A failed to respond.', items: [] as { name: string; carbs: number }[]}
-    let resultB = { summary: '0', details: 'Model B failed to respond.', items: [] as { name: string; carbs: number }[] }
-
-    if (responseA.ok) {
-      const dataA = await responseA.json()
-      const messageA = dataA.choices?.[0]?.message?.content || ''
-      resultA = parseGroqResponse(messageA)
-    } else {
-      console.error('Groq API error (Model A):', responseA.status, await responseA.text())
-    }
-
-    if (responseB.ok) {
-      const dataB = await responseB.json()
-      const messageB = dataB.choices?.[0]?.message?.content || ''
-      resultB = parseGroqResponse(messageB)
-    } else {
-      console.error('Groq API error (Model B):', responseB.status, await responseB.text())
-    }
-
-    // Combine the results
-    const numA = parseInt(resultA.summary, 10)
-    const numB = parseInt(resultB.summary, 10)
-
-    const validSummaries: number[] = []
-    if (!isNaN(numA) && numA > 0) validSummaries.push(numA)
-    if (!isNaN(numB) && numB > 0) validSummaries.push(numB)
-
-    let finalSummary = '0'
-    if (validSummaries.length > 0) {
-      const avg = validSummaries.reduce((a, b) => a + b, 0) / validSummaries.length
-      finalSummary = Math.round(avg).toString() // Average the valid results
-    }
-
-    const combinedItems = [...(resultA.items || []), ...(resultB.items || [])]
-
-    // Average duplicates (same food name)
-    const averagedItems: { name: string; carbs: number }[] = []
-    const grouped: Record<string, number[]> = {}
-    for (const item of combinedItems) {
-      const key = item.name.toLowerCase()
-      if (!grouped[key]) grouped[key] = []
-      grouped[key].push(item.carbs)
-    }
-    for (const [name, carbs] of Object.entries(grouped)) {
-      const avg = carbs.reduce((a, b) => a + b, 0) / carbs.length
-      averagedItems.push({ name, carbs: Math.round(avg) })
-    }
-
-    // Ensure final items sum to final summary
-    const totalItemCarbs = averagedItems.reduce((sum, item) => sum + item.carbs, 0)
-    const targetTotal = parseInt(finalSummary, 10)
-
-    if (totalItemCarbs > 0 && targetTotal > 0 && Math.abs(totalItemCarbs - targetTotal) > 1) {
-      const scale = targetTotal / totalItemCarbs
-
-      for (const item of averagedItems) {
-        item.carbs = Math.round(item.carbs * scale)
-      }
-
-      const adjustedTotal = averagedItems.reduce((s, i) => s + i.carbs, 0)
-      const diff = targetTotal - adjustedTotal
-      if (Math.abs(diff) > 0) {
-        averagedItems[averagedItems.length - 1].carbs += diff
-      }
-    }
-
-    const finalDetails = `
-    --- OPINION 1 (Llama 4 Scout) ---
-    ${resultA.details}
-
-    --- OPINION 2 (Llama 4 Maverick) ---
-    ${resultB.details}
-    `
-  
-    // Handle total failure
-    if (validSummaries.length === 0) {
-      return NextResponse.json({ error: 'Both AI models failed to provide an analysis.' }, { status: 500 })
+    You are an expert nutritionist. Analyse the food in this image for carbohydrate content.
+    
+    CRITICAL STEP - VOLUMETRIC ANALYSIS:
+    1. Identify the food items.
+    2. Look for visual cues to estimate SIZE (e.g., compare to the plate size, silverware, or visible table texture).
+    3. Is this a "Small", "Standard", or "Large" portion? (User says: ${mealSize})
+    4. Estimate the weight in grams based on this volume.
+    
+    OUTPUT FORMAT:
+    Return a raw JSON object only.
+    
+    {
+      "items": [
+        { 
+          "name": "string (e.g., 'Carrot Cake')", 
+          "portion_desc": "string (e.g., '1 thick slice (approx 200g)')",
+          "weight_g": number, 
+          "carbs": number, 
+          "confidence": 0-1
+        }
+      ],
+      "total_carbs": number,
+      "summary_text": "string (brief reasoning)"
     }
     
-    // Return the averaged result
+    User Context: ${userContext || 'None'}
+    `
+
+    const modelA_ID = 'meta-llama/llama-4-scout-17b-16e-instruct'
+    const modelB_ID = 'meta-llama/llama-4-maverick-17b-128e-instruct'
+
+    // Run models in parallel
+    const [resA, resB] = await Promise.all([
+      runModel(prompt, imageUrl, modelA_ID),
+      runModel(prompt, imageUrl, modelB_ID)
+    ])
+
+    // Merge results
+    const mergedItems = merge(resA.items || [], resB.items || [])
+    const totalCarbs = mergedItems.reduce((acc, item) => acc + item.carbs, 0)
+
     return NextResponse.json({
-      summary: finalSummary,
-      details: finalDetails.trim(),
-      items: averagedItems,
+      totalCarbs: Math.round(totalCarbs),
+      items: mergedItems,
+      details: {
+        model_a_summary: resA.summary_text,
+        model_b_summary: resB.summary_text
+      }
     })
+
   } catch (error) {
-    console.error('API error:', error)
+    console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
+}
+
+async function runModel(prompt: string, imageUrl: string, modelId: string): Promise<{ items: FoodItem[], summary_text: string }> {
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: imageUrl } },
+          ],
+        },
+      ],
+      model: modelId,
+      temperature: 0.2,
+      response_format: { type: 'json_object' }, 
+    })
+
+    const content = completion.choices[0].message.content
+    if (!content) throw new Error("Empty response")
+    
+    return JSON.parse(content)
+  } catch (e) {
+    console.error(`Model ${modelId} failed:`, e)
+    return { items: [], summary_text: `Error from ${modelId}` }
+  }
+}
+
+function merge(listA: FoodItem[], listB: FoodItem[]): FoodItem[] {
+  const finalItems: FoodItem[] = [...listA]
+
+  listB.forEach((itemB) => {
+    // Check for semantic overlap
+    const matchIndex = finalItems.findIndex((itemA) => 
+      areNamesSimilar(itemA.name, itemB.name)
+    )
+
+    // Found duplicate item: average the numbers
+    if (matchIndex > -1) {
+      const existingItem = finalItems[matchIndex]
+      
+      existingItem.carbs = Math.round((existingItem.carbs + itemB.carbs) / 2)
+      existingItem.weight_g = Math.round((existingItem.weight_g + itemB.weight_g) / 2)
+      
+      const reasonA = existingItem.reasoning || ''
+      const reasonB = itemB.reasoning || ''
+      
+      if (!reasonA.includes('[Model A]')) {
+         existingItem.reasoning = `[Model A]: ${reasonA} | [Model B]: ${reasonB}`
+      }
+      
+      // Keep the longer name
+      if (itemB.name.length > existingItem.name.length) {
+        existingItem.name = itemB.name
+      }
+      
+      // Grab the portion description if missing
+      if (!existingItem.portion_desc && itemB.portion_desc) {
+        existingItem.portion_desc = itemB.portion_desc
+      }
+
+    } else {
+      // Add new item to the list
+      finalItems.push(itemB)
+    }
+  })
+
+  return finalItems
+}
+
+function areNamesSimilar(name1: string, name2: string): boolean {
+  if (!name1 || !name2) return false
+  
+  // Normalise text
+  const clean1 = name1.toLowerCase().replace(/[^\w\s]/g, '')
+  const clean2 = name2.toLowerCase().replace(/[^\w\s]/g, '')
+  const words1 = new Set(clean1.split(/\s+/))
+  const words2 = new Set(clean2.split(/\s+/))
+  
+  // Calculate overlap
+  const intersection = new Set([...words1].filter(x => words2.has(x)))
+  const union = new Set([...words1, ...words2])
+  
+  return intersection.size / union.size > 0.3 
 }

@@ -4,23 +4,11 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { Loader2, TrendingUp, BarChart3, CalendarCheck } from 'lucide-react'
+import { AnalysisRecord, DailyTotal, AuthenticatedComponentProps } from '@/lib/types'
 
-type Analysis = {
-  created_at: string
-  result_summary: string
-}
-
-type DailyTotal = {
-  date: string
-  totalCarbs: number
-}
-
-type Props = {
-  userId: string
-}
-
-export default function Stats({ userId }: Props) {
+export default function Stats({ userId }: AuthenticatedComponentProps) {
   const supabase = createClientComponentClient()
+  
   const [dailyData, setDailyData] = useState<DailyTotal[]>([])
   const [averageDaily, setAverageDaily] = useState(0)
   const [totalEntries, setTotalEntries] = useState(0)
@@ -31,7 +19,8 @@ export default function Stats({ userId }: Props) {
     if (!userId) return
     setLoading(true)
 
-    // Fetch all analyses for the user
+    type StatsQueryData = Pick<AnalysisRecord, 'created_at' | 'result_summary'>
+
     const { data, error } = await supabase
       .from('analyses')
       .select('created_at, result_summary')
@@ -44,17 +33,21 @@ export default function Stats({ userId }: Props) {
       return
     }
 
-    // Process the data
+    const records = data as unknown as StatsQueryData[]
     const totalsByDay: { [key: string]: number } = {}
-    data.forEach((entry: Analysis) => {
-      const date = new Date(entry.created_at).toLocaleDateString('en-CA')
+    
+    records.forEach((entry) => {
+      // Use (YYYY-MM-DD) for storing keys
+      const dateKey = new Date(entry.created_at).toLocaleDateString('en-CA')
       const carbs = parseFloat(entry.result_summary)
+
       if (!isNaN(carbs)) {
-        totalsByDay[date] = (totalsByDay[date] || 0) + carbs
+        totalsByDay[dateKey] = (totalsByDay[dateKey] || 0) + carbs
       }
     })
 
     const processedData: DailyTotal[] = Object.entries(totalsByDay).map(([date, totalCarbs]) => ({
+      // Format: "Nov 30"
       date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       totalCarbs: Math.round(totalCarbs),
     }))
@@ -64,8 +57,8 @@ export default function Stats({ userId }: Props) {
 
     // Calculate overall stats
     const totalDays = Object.keys(totalsByDay).length
-    const totalCarbs = Object.values(totalsByDay).reduce((sum, total) => sum + total, 0)
-    const avg = totalDays > 0 ? Math.round(totalCarbs / totalDays) : 0
+    const totalCarbsSum = Object.values(totalsByDay).reduce((sum, total) => sum + total, 0)
+    const avg = totalDays > 0 ? Math.round(totalCarbsSum / totalDays) : 0
 
     let highest: { date: string; total: number } | null = null
     if (processedData.length > 0) {
@@ -78,7 +71,7 @@ export default function Stats({ userId }: Props) {
 
     setDailyData(last7DaysData)
     setAverageDaily(avg)
-    setTotalEntries(data.length)
+    setTotalEntries(records.length)
     setHighestDay(highest)
     setLoading(false)
   }, [userId, supabase])
@@ -153,7 +146,7 @@ export default function Stats({ userId }: Props) {
                 labelStyle={{ fontWeight: 'bold' }}
                 formatter={(value) => [`${value}g`, 'Carbs']}
               />
-              <Bar dataKey="totalCarbs" fill="url(#colorUv)" radius={[4, 4, 0, 0] } activeBar={{ fill: '#22d3ee', opacity: 1 }}/>
+              <Bar dataKey="totalCarbs" fill="url(#colorUv)" radius={[4, 4, 0, 0]} activeBar={{ fill: '#22d3ee', opacity: 1 }}/>
               <defs>
                 <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.8}/>

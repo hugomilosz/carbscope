@@ -5,22 +5,47 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { AnalysisRecord, AuthenticatedComponentProps, FoodItem } from '@/lib/types'
 
-type Analysis = {
-  id: string
-  image_url: string
-  result_summary: string
-  result_details: string
-  created_at: string
+const DetailsRenderer = ({ content }: { content: string }) => {
+  try {
+    if (content.trim().startsWith('[')) {
+      const items: FoodItem[] = JSON.parse(content)
+      
+      return (
+        <div className="space-y-3 mt-2">
+          {items.map((item, i) => (
+            <div key={i} className="flex justify-between items-start bg-white/5 p-3 rounded-lg border border-white/5">
+              <div>
+                <span className="font-semibold text-white block">{item.name}</span>
+                <span className="text-xs text-white/50">
+                  {item.portion_desc || `${item.weight_g}g`}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-emerald-400 font-bold block">{item.carbs}g</span>
+                <span className="text-[10px] text-white/40 uppercase tracking-wider">Carbs</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  } catch (e) {
+    // Old text format. Fallback to markdown below
+  }
+
+  // Fallback to markdown rendering
+  return (
+    <div className="prose prose-invert max-w-none text-white/90 leading-relaxed text-sm">
+      <ReactMarkdown>{content}</ReactMarkdown>
+    </div>
+  )
 }
 
-type Props = {
-  userId: string
-}
-
-export default function History({ userId }: Props) {
+export default function History({ userId }: AuthenticatedComponentProps) {
   const supabase = createClientComponentClient()
-  const [history, setHistory] = useState<Analysis[]>([])
+  const [history, setHistory] = useState<AnalysisRecord[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -214,13 +239,10 @@ export default function History({ userId }: Props) {
                   <div className="mt-6 pt-6 border-t border-white/10">
                     <div className="bg-black/20 border border-white/10 rounded-xl p-5">
                       <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-lg flex items-center justify-center">
-                          <span className="text-xs">📊</span>
-                        </div>
                         Detailed Analysis
                       </h4>
                       <div className="prose prose-invert max-w-none text-white/90 leading-relaxed">
-                        <ReactMarkdown>{entry.result_details}</ReactMarkdown>
+                        <DetailsRenderer content={entry.result_details} />
                       </div>
                     </div>
                   </div>

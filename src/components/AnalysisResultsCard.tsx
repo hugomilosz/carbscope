@@ -1,25 +1,9 @@
 import { useState } from 'react'
 import { TrendingUp, Info, ChevronDown, ChevronUp, Zap, Brain } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { AnalysisResult } from '@/lib/types'
 
-interface FoodItem {
-  name: string
-  carbs: number
-  weight_g: number
-  portion_desc?: string
-  reasoning?: string
-}
-
-interface AnalysisData {
-  totalCarbs: number
-  items: FoodItem[]
-  details: {
-    model_a_summary: string
-    model_b_summary: string
-  }
-}
-
-export default function AnalysisResultCard({ analysis }: { analysis: AnalysisData }) {
+export default function AnalysisResultCard({ analysis }: { analysis: AnalysisResult }) {
   const [showDetails, setShowDetails] = useState(false)
   const [activeTab, setActiveTab] = useState<'scout' | 'maverick'>('scout')
 
