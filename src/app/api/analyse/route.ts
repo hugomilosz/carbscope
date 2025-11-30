@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { FoodItem } from '@/lib/types'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-
 export async function POST(req: NextRequest) {
   try {
     const { imageUrl, userContext, mealSize } = await req.json()
@@ -72,6 +70,7 @@ export async function POST(req: NextRequest) {
 
 async function runModel(prompt: string, imageUrl: string, modelId: string): Promise<{ items: FoodItem[], summary_text: string }> {
   try {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
     const completion = await groq.chat.completions.create({
       messages: [
         {
