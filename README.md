@@ -18,14 +18,14 @@ https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
 - **Image Upload**  
   Drag-and-drop or use a file picker to upload food images. Files are securely stored in **Supabase Storage**.
 
-- **Dual-Model AI Estimation**
-  Gets a more accurate estimate by querying two AI models (Llama 4 Scout and Llama 3 70b) via Groq and averaging their results.
+- **Dual-Model AI Estimation** <br>
+  Instead of relying on one opinion, the app queries the Llama 4 Scout and Llama 4 Maverick models simultaneously. It uses a Jaccard Similarity algorithm to merge duplicates and average the carbohydrate estimates.
 
 - **Meal Context Input**  
   Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
   Optionally, add extra information (e.g. "contains rice and beans") to refine results.
 
-- **Analysis History**
+- **Analysis History** <br>
   Tracks user activity and displays key metrics (built with **Recharts**).
   Users can view a log of their previous analyses, stored in Supabase.
   
