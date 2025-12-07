@@ -22,8 +22,7 @@ https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
   Instead of relying on one opinion, the app queries the Llama 4 Scout and Llama 4 Maverick models simultaneously. It uses a Jaccard Similarity algorithm to merge duplicates and average the carbohydrate estimates.
 
 - **Meal Context Input**  
-  Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
-  Optionally, add extra information (e.g. "contains rice and beans") to refine results.
+  Users can specify portion sizes (Small, Standard, Large) and add context notes (e.g., "I didn't eat the bun") to improve accuracy.
 
 - **Analysis History** <br>
   Tracks user activity and displays key metrics (built with **Recharts**).
