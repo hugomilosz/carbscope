@@ -77,15 +77,21 @@ export default function History({ userId }: AuthenticatedComponentProps) {
       setHistory([])
     } else if (data) {
       setHistory(data)
+      const signedUrlEntries = await Promise.all(
+        data.map(async (entry) => {
+          const { data: urlData } = await supabase.storage
+            .from('images')
+            .createSignedUrl(entry.image_url, 60 * 60)
 
-      const urls: Record<string, string> = {}
-      for (const entry of data) {
-        const { data: urlData } = await supabase.storage
-          .from('images')
-          .createSignedUrl(entry.image_url, 60 * 60)
-        if (urlData?.signedUrl) urls[entry.id] = urlData.signedUrl
-      }
-      setSignedUrls(urls)
+          return [entry.id, urlData?.signedUrl ?? ''] as const
+        })
+      )
+
+      setSignedUrls(
+        Object.fromEntries(
+          signedUrlEntries.filter(([, signedUrl]) => signedUrl)
+        )
+      )
     }
 
     setLoading(false)
