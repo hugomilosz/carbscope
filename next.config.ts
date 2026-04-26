@@ -7,6 +7,4 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
 };
 
-module.exports = nextConfig;
-
 export default nextConfig;

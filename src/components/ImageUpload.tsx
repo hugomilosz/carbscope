@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { Loader2, Upload, Camera, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
@@ -22,6 +22,14 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    return () => {
+      if (preview && typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(preview)
+      }
+    }
+  }, [preview])
+
   function processFile(selectedFile: File | null) {
     setError(null)
     setUploadedUrl(null)
@@ -31,6 +39,9 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
     if (selectedFile.size > 10 * 1024 * 1024) return setError('File size must be less than 10MB')
     
     setFile(selectedFile)
+    if (preview && typeof URL.revokeObjectURL === 'function') {
+      URL.revokeObjectURL(preview)
+    }
     setPreview(URL.createObjectURL(selectedFile))
     uploadImage(selectedFile)
   }
