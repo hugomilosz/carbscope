@@ -57,12 +57,13 @@ describe('POST /api/analyse', () => {
                 {
                   name: 'Rice',
                   portion_desc: '1 bowl',
-                  weight_g: 180,
-                  carbs: 52,
+                  weight_g: 182,
+                  carbs: 45,
+                  carbs_per_100g: 29,
                   confidence: 0.8,
                 },
               ],
-              total_carbs: 52,
+              total_carbs: 45,
               summary_text: 'Scout summary',
             }),
           },
@@ -88,12 +89,14 @@ describe('POST /api/analyse', () => {
       name: 'Rice',
       weight_g: 180,
       carbs: 52,
+      carbs_per_100g: 29,
       confidence: 0.8,
     })
     expect(body.details).toMatchObject({
       strategy: 'single_scout',
       primary_label: 'Llama 4 Scout',
       primary_model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      prompt_version: 'scout_v2_density_first',
       primary_total: 52,
       final_total: 52,
       primary_summary: 'Scout summary',
@@ -127,8 +130,8 @@ describe('POST /api/analyse', () => {
                 items: [
                   {
                     name: 'Rice',
-                    weight_g: 150,
-                    carbs: 45,
+                    weight_g: 148,
+                    carbs_per_100g: 30,
                   },
                 ],
                 summary_text: 'Recovered',
@@ -153,6 +156,7 @@ describe('POST /api/analyse', () => {
     expect(response.status).toBe(200)
     expect(body.details.primary_summary).toBe('Recovered')
     expect(body.details.strategy).toBe('single_scout')
+    expect(body.totalCarbs).toBe(45)
     expect(getMockCreate()).toHaveBeenCalledTimes(2)
   })
 })

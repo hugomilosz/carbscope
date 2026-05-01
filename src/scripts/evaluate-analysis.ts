@@ -16,10 +16,15 @@ interface EvalRow {
   strategy: AnalysisStrategy
   expectedTotalCarbs: number
   predictedTotalCarbs: number
+  signedError: number
   absoluteError: number
   percentError: number
+  within5g: boolean
   within10g: boolean
   latencyMs: number
+  itemCount: number
+  averageConfidence: number | null
+  promptVersion: string
 }
 
 async function main() {
@@ -41,20 +46,33 @@ async function main() {
       const startedAt = Date.now()
       const result = await analyseFoodImage(input, { groq, strategy })
       const latencyMs = Date.now() - startedAt
+      const signedError = result.totalCarbs - entry.expectedTotalCarbs
       const absoluteError = Math.abs(result.totalCarbs - entry.expectedTotalCarbs)
       const percentError = Math.round(
         (absoluteError / Math.max(entry.expectedTotalCarbs, 1)) * 100
       )
+      const confidences = result.items
+        .map((item) => item.confidence)
+        .filter((value): value is number => typeof value === 'number')
+      const averageConfidence =
+        confidences.length > 0
+          ? round(confidences.reduce((sum, value) => sum + value, 0) / confidences.length)
+          : null
 
       rows.push({
         caseId: entry.id,
         strategy,
         expectedTotalCarbs: entry.expectedTotalCarbs,
         predictedTotalCarbs: result.totalCarbs,
+        signedError,
         absoluteError,
         percentError,
+        within5g: absoluteError <= 5,
         within10g: absoluteError <= 10,
         latencyMs,
+        itemCount: result.items.length,
+        averageConfidence,
+        promptVersion: result.details.prompt_version,
       })
     }
   }
@@ -127,17 +145,32 @@ function buildSummary(rows: EvalRow[]) {
   return STRATEGIES.map((strategy) => {
     const strategyRows = rows.filter((row) => row.strategy === strategy)
     const totalAbsoluteError = strategyRows.reduce((sum, row) => sum + row.absoluteError, 0)
+    const totalSignedError = strategyRows.reduce((sum, row) => sum + row.signedError, 0)
     const totalPercentError = strategyRows.reduce((sum, row) => sum + row.percentError, 0)
     const totalLatency = strategyRows.reduce((sum, row) => sum + row.latencyMs, 0)
+    const within5gCount = strategyRows.filter((row) => row.within5g).length
     const within10gCount = strategyRows.filter((row) => row.within10g).length
+    const confidenceRows = strategyRows.filter((row) => row.averageConfidence !== null)
 
     return {
       strategy,
       cases: strategyRows.length,
+      promptVersion: strategyRows[0]?.promptVersion ?? 'unknown',
       meanAbsoluteError: round(totalAbsoluteError / strategyRows.length),
+      meanSignedError: round(totalSignedError / strategyRows.length),
       meanPercentError: round(totalPercentError / strategyRows.length),
+      within5gRate: round((within5gCount / strategyRows.length) * 100),
       within10gRate: round((within10gCount / strategyRows.length) * 100),
       averageLatencyMs: round(totalLatency / strategyRows.length),
+      averageConfidence:
+        confidenceRows.length > 0
+          ? round(
+              confidenceRows.reduce(
+                (sum, row) => sum + (row.averageConfidence ?? 0),
+                0
+              ) / confidenceRows.length
+            )
+          : null,
     }
   })
 }
