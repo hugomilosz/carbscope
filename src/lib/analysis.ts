@@ -27,7 +27,6 @@ const modelResponseSchema = z.object({
   summary_text: z.string().default('No reasoning details available.'),
 })
 
-type ModelResponse = z.infer<typeof modelResponseSchema>
 type NormalisedFoodItem = z.infer<typeof foodItemSchema> & {
   carbs: number
 }
