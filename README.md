@@ -4,7 +4,7 @@
 
 Users can upload food images, receive a detailed carbohydrate analysis, track their history, and view a personal statistics dashboard.
 
-🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope-yqcl.vercel.app)
+🔗 Live Demo: [https://carbscope.vercel.app](https://carbscope.vercel.app)
 
 https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
 
@@ -22,10 +22,9 @@ https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
   Uses `meta-llama/llama-4-scout-17b-16e-instruct` to analyse the uploaded image and return a structured carbohydrate estimate.
 
 - **Meal Context Input**  
-  Choose between *small*, *standard*, or *large* to improve estimation accuracy.  
-  Optionally, add extra information (e.g. "contains rice and beans") to refine results.
+  Users can specify portion sizes (Small, Standard, Large) and add context notes (e.g., "I didn't eat the bun") to improve accuracy.
 
-- **Analysis History**
+- **Analysis History** <br>
   Tracks user activity and displays key metrics (built with **Recharts**).
   Users can view a log of their previous analyses, stored in Supabase.
   
