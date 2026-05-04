@@ -1,0 +1,10 @@
+[
+  {
+    "id": "pasta",
+    "imagePath": "../../pasta.jpeg",
+    "mealSize": "standard",
+    "userContext": "Pasta dish.",
+    "expectedTotalCarbs": 87,
+    "tags": ["seed", "main"]
+  }
+]

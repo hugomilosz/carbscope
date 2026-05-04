@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "jest --config jest.config.ts",
-    "coverage": "jest --coverage --coverageReporters=\"json-summary\""
+    "coverage": "jest --coverage --coverageReporters=\"json-summary\"",
+    "eval:analysis": "ts-node --compiler-options '{\"module\":\"commonjs\"}' src/scripts/evaluate-analysis.ts"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.14.0",

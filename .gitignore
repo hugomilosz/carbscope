@@ -25,6 +25,16 @@
 *.pem
 .history/
 __pycache__/
+eval-report.json
+CarbScopeDemo.mov
+CarbScopeDemoUncropped.mov
+demo.mov
+burger.jpg
+chocolateCake.jpg
+pasta.jpg
+pasta.jpeg
+tailwind.config.ts
+READMEnpm.md
 
 # debug
 npm-debug.log*

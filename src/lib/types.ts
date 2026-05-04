@@ -1,8 +1,12 @@
+export type AnalysisStrategy = 'single_scout'
+
 // API Types
 export interface FoodItem {
   name: string
   weight_g: number
   carbs: number
+  carbs_per_100g?: number
+  confidence?: number
   portion_desc?: string
   reasoning?: string
 }
@@ -11,8 +15,13 @@ export interface AnalysisResult {
   totalCarbs: number
   items: FoodItem[]
   details: {
-    model_a_summary: string
-    model_b_summary: string
+    strategy: AnalysisStrategy
+    primary_label: string
+    primary_model: string
+    prompt_version: string
+    primary_summary: string
+    primary_total: number
+    final_total: number
   }
 }
 
