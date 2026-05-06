@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { Loader2, Upload, Camera, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
 import { AuthenticatedComponentProps } from '@/lib/types'
+import { supabase } from '@/lib/supabaseClient'
 
 interface ImageUploadProps extends AuthenticatedComponentProps {
   isGuest?: boolean
@@ -12,7 +12,6 @@ interface ImageUploadProps extends AuthenticatedComponentProps {
 }
 
 export default function ImageUpload({ userId, isGuest = false, onUploadComplete }: ImageUploadProps) {
-  const supabase = createClientComponentClient()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -69,6 +68,18 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
     const filePath = `${userId}/${Date.now()}_${fileToUpload.name}`
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('Your session has expired. Please sign in again.')
+      }
+
+      if (user.id !== userId) {
+        throw new Error('Your account session is out of sync. Refresh and try again.')
+      }
+
       const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(filePath, fileToUpload, { upsert: false })
@@ -85,7 +96,7 @@ export default function ImageUpload({ userId, isGuest = false, onUploadComplete 
       setLoading(false)
       setTimeout(() => setUploadProgress(0), 2000)
     }
-  }, [userId, isGuest, onUploadComplete, supabase])
+  }, [userId, isGuest, onUploadComplete])
 
   return (
     <div className="space-y-6">

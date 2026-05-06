@@ -1,9 +1,18 @@
 import '@testing-library/jest-dom'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ImageUpload from '@/components/ImageUpload'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabaseClient'
 
-jest.mock('@supabase/auth-helpers-nextjs')
+jest.mock('@/lib/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      getUser: jest.fn(),
+    },
+    storage: {
+      from: jest.fn(),
+    },
+  },
+}))
 
 beforeAll(() => {
   // Mock URL.createObjectURL since jsdom doesn't implement it
@@ -17,18 +26,18 @@ describe('ImageUpload component', () => {
     jest.clearAllMocks()
     global.URL.createObjectURL = jest.fn(() => 'mocked-url')
 
+    ;(supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: 'user123' } },
+    })
+
     // Mock Supabase client
     const mockUpload = jest.fn().mockResolvedValue({
       data: { Key: 'user123/123_meal.png' },
       error: null
     })
     const mockFrom = jest.fn(() => ({ upload: mockUpload }))
-    
-    // Tell TypeScript this is a Jest mock
-    const mockedCreateClient = createClientComponentClient as jest.Mock
-    mockedCreateClient.mockReturnValue({
-      storage: { from: mockFrom }
-    })
+
+    ;(supabase.storage.from as jest.Mock).mockImplementation(mockFrom)
   })
 
   it('renders the upload area and initial UI', () => {
@@ -97,10 +106,7 @@ describe('ImageUpload component', () => {
       error: { message: 'Upload failed' }
     })
     const mockFromFail = jest.fn(() => ({ upload: mockUploadFail }))
-    const mockedCreateClient = createClientComponentClient as jest.Mock
-    mockedCreateClient.mockReturnValue({
-      storage: { from: mockFromFail }
-    })
+    ;(supabase.storage.from as jest.Mock).mockImplementation(mockFromFail)
 
     render(<ImageUpload userId="user123" />)
 
@@ -217,6 +223,22 @@ describe('ImageUpload component', () => {
         expect.stringContaining('data:image')
       )
     })
+  })
+
+  it('shows a clear error when the auth session is missing', async () => {
+    ;(supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: null },
+    })
+
+    render(<ImageUpload userId="user123" />)
+
+    const file = new File(['mock'], 'meal.png', { type: 'image/png' })
+    const input = screen.getByTestId('file-input')
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() =>
+      expect(screen.getByText(/session has expired/i)).toBeInTheDocument()
+    )
   })
 
 })

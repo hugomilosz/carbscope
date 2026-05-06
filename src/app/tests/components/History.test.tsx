@@ -1,9 +1,16 @@
 import '@testing-library/jest-dom'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import History from '@/components/History'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabaseClient'
 
-jest.mock('@supabase/auth-helpers-nextjs')
+jest.mock('@/lib/supabaseClient', () => ({
+  supabase: {
+    from: jest.fn(),
+    storage: {
+      from: jest.fn(),
+    },
+  },
+}))
 
 const waitForDataLoad = async () => {
   await waitFor(() =>
@@ -60,9 +67,9 @@ describe('History component', () => {
       return {}
     })
 
-    ;(createClientComponentClient as jest.Mock).mockReturnValue({
-      from: mockSupabaseFrom,
-      storage: { from: () => ({ createSignedUrl: mockCreateSignedUrl }) },
+    ;(supabase.from as jest.Mock).mockImplementation(mockSupabaseFrom)
+    ;(supabase.storage.from as jest.Mock).mockReturnValue({
+      createSignedUrl: mockCreateSignedUrl,
     })
   })
 
