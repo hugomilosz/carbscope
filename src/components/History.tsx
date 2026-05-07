@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import NextImage from 'next/image'
 import { ChevronDown, ChevronUp, Trash2, Loader2, Calendar, Sparkles, TrendingUp, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { AnalysisRecord, AuthenticatedComponentProps, FoodItem } from '@/lib/types'
+import { supabase } from '@/lib/supabaseClient'
 
 const DetailsRenderer = ({ content }: { content: string }) => {
   try {
@@ -44,7 +44,6 @@ const DetailsRenderer = ({ content }: { content: string }) => {
 }
 
 export default function History({ userId }: AuthenticatedComponentProps) {
-  const supabase = createClientComponentClient()
   const [history, setHistory] = useState<AnalysisRecord[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -95,7 +94,7 @@ export default function History({ userId }: AuthenticatedComponentProps) {
     }
 
     setLoading(false)
-  }, [supabase, userId, filterDate])
+  }, [userId, filterDate])
 
   useEffect(() => {
     if (userId) fetchHistory()

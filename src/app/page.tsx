@@ -4,15 +4,13 @@ import { useState, useCallback } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import Login from '../components/Login'
 import ImageUpload from '../components/ImageUpload'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import History from '../components/History'
 import Stats from '../components/Stats'
 import { Zap, Shield, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
 import { Analytics } from '@vercel/analytics/react'
 import AnalysisResultCard from '@/components/AnalysisResultsCard'
 import { AnalysisResult } from '@/lib/types'
-
-const supabase = createClientComponentClient()
+import { supabase } from '@/lib/supabaseClient'
 
 export default function Home() {
   const { user, signOut } = useAuth()

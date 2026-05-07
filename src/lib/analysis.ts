@@ -47,6 +47,12 @@ export interface AnalyseFoodImageOptions {
   strategy?: AnalysisStrategy
 }
 
+export interface EvalExpectedItem {
+  name: string
+  aliases?: string[]
+  expectedCarbs?: number
+}
+
 export interface EvalDatasetEntry {
   id: string
   imagePath?: string
@@ -54,6 +60,8 @@ export interface EvalDatasetEntry {
   userContext?: string
   mealSize?: string
   expectedTotalCarbs: number
+  toleranceGrams?: number
+  expectedItems?: EvalExpectedItem[]
   tags?: string[]
   notes?: string
 }

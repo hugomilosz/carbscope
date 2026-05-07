@@ -5,6 +5,14 @@
     "mealSize": "standard",
     "userContext": "Pasta dish.",
     "expectedTotalCarbs": 87,
+    "toleranceGrams": 10,
+    "expectedItems": [
+      {
+        "name": "pasta",
+        "aliases": ["spaghetti", "noodles"],
+        "expectedCarbs": 87
+      }
+    ],
     "tags": ["seed", "main"]
   }
 ]
