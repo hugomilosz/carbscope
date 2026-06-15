@@ -84,7 +84,16 @@ describe('History component', () => {
       id: '1',
       image_url: 'img1.png',
       result_summary: '50',
-      result_details: 'Details',
+      result_details: JSON.stringify({
+        items: [
+          {
+            name: 'Rice',
+            weight_g: 180,
+            carbs: 52,
+          },
+        ],
+        mealTags: ['lunch'],
+      }),
       created_at: new Date().toISOString(),
     }]
     const promise: Promise<MockQueryResult> = Promise.resolve({ data, error: null })
@@ -108,7 +117,16 @@ describe('History component', () => {
       id: '1',
       image_url: 'img1.png',
       result_summary: '50',
-      result_details: 'Details',
+      result_details: JSON.stringify({
+        items: [
+          {
+            name: 'Rice',
+            weight_g: 180,
+            carbs: 52,
+          },
+        ],
+        mealTags: ['lunch'],
+      }),
       created_at: new Date().toISOString(),
     }]
     const promise = Promise.resolve({ data, error: null })
@@ -136,7 +154,16 @@ describe('History component', () => {
       id: '1',
       image_url: 'img1.png',
       result_summary: '50',
-      result_details: 'Details',
+      result_details: JSON.stringify({
+        items: [
+          {
+            name: 'Rice',
+            weight_g: 180,
+            carbs: 52,
+          },
+        ],
+        mealTags: ['lunch'],
+      }),
       created_at: new Date().toISOString(),
     }]
     const promise = Promise.resolve({ data, error: null })
@@ -187,7 +214,16 @@ describe('History component', () => {
       id: '1',
       image_url: 'img1.png',
       result_summary: '50',
-      result_details: 'Details',
+      result_details: JSON.stringify({
+        items: [
+          {
+            name: 'Rice',
+            weight_g: 180,
+            carbs: 52,
+          },
+        ],
+        mealTags: ['lunch'],
+      }),
       created_at: '2025-10-24T12:00:00.000Z',
     }]
     const promise = Promise.resolve({ data, error: null })
@@ -209,7 +245,16 @@ describe('History component', () => {
         id: '1',
         image_url: 'img1.png',
         result_summary: '50',
-        result_details: 'Details',
+        result_details: JSON.stringify({
+          items: [
+            {
+              name: 'Rice',
+              weight_g: 180,
+              carbs: 52,
+            },
+          ],
+          mealTags: ['lunch'],
+        }),
         created_at: new Date().toISOString(),
     }]
     const promise = Promise.resolve({ data, error: null })

@@ -3,7 +3,7 @@ import { analyseFoodImage } from '@/lib/analysis'
 
 export async function POST(req: NextRequest) {
   try {
-    const { imageUrl, userContext, mealSize } = await req.json()
+    const { imageUrl, userContext, mealSize, mealTags } = await req.json()
 
     if (!imageUrl) {
       return NextResponse.json({ error: 'Image URL is required' }, { status: 400 })
@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       imageUrl,
       userContext,
       mealSize,
+      mealTags,
     })
 
     return NextResponse.json(result)

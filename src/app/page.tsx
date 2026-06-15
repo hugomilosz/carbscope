@@ -12,6 +12,17 @@ import AnalysisResultCard from '@/components/AnalysisResultsCard'
 import { AnalysisResult } from '@/lib/types'
 import { supabase } from '@/lib/supabaseClient'
 
+const MEAL_TAG_OPTIONS = [
+  'home',
+  'restaurant',
+  'takeout',
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'dessert',
+]
+
 export default function Home() {
   const { user, signOut } = useAuth()
   const [isGuest, setIsGuest] = useState(false)
@@ -22,6 +33,7 @@ export default function Home() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [userContext, setUserContext] = useState('')
   const [mealSize, setMealSize] = useState('standard')
+  const [mealTags, setMealTags] = useState<string[]>([])
 
   const handleUploadComplete = useCallback((url: string) => {
     setUploadedImageUrl(url)
@@ -37,6 +49,7 @@ export default function Home() {
     setUploadedImageUrl(null)
     setAnalysis(null)
     setUserContext('')
+    setMealTags([])
   }
 
   async function analyseImage() {
@@ -69,7 +82,7 @@ export default function Home() {
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize }),
+        body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize, mealTags }),
       })
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -86,7 +99,11 @@ export default function Home() {
           user_id: user.id,
           image_url: uploadedImageUrl,
           result_summary: data.totalCarbs.toString(), 
-          result_details: JSON.stringify(data.items), 
+          result_details: JSON.stringify({
+            items: data.items,
+            mealTags,
+            details: data.details,
+          }),
         })
       }
     } catch (err: unknown) {
@@ -183,6 +200,45 @@ export default function Home() {
               rows={3}
               className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl p-4 resize-none focus:outline-none focus:border-emerald-400/50 transition-colors"
             />
+          </div>
+
+          {/* Meal Tags */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-gray-300">Meal tags</p>
+              <button
+                type="button"
+                onClick={() => setMealTags([])}
+                className="text-xs text-gray-400 hover:text-white transition"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {MEAL_TAG_OPTIONS.map((tag) => {
+                const active = mealTags.includes(tag)
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() =>
+                      setMealTags((current) =>
+                        current.includes(tag)
+                          ? current.filter((value) => value !== tag)
+                          : [...current, tag]
+                      )
+                    }
+                    className={`px-3 py-2 rounded-full border text-sm transition-all ${
+                      active
+                        ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-200'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Action Button */}

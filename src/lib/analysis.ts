@@ -40,6 +40,7 @@ export interface AnalyseFoodImageInput {
   imageUrl: string
   userContext?: string
   mealSize?: string
+  mealTags?: string[]
 }
 
 export interface AnalyseFoodImageOptions {
@@ -106,6 +107,7 @@ export async function analyseFoodImage(
 
 function buildVisionPrompt(input: AnalyseFoodImageInput) {
   const mealSize = normaliseMealSize(input.mealSize)
+  const mealTags = Array.isArray(input.mealTags) ? input.mealTags.filter(Boolean) : []
 
   return `
 You are an expert nutritionist. Analyse the food in this image for carbohydrate content.
@@ -119,6 +121,7 @@ CRITICAL STEP - VOLUMETRIC ANALYSIS:
 6. Estimate carbohydrates conservatively and avoid inventing unseen ingredients.
 7. Exclude non-carbohydrate garnish unless it materially changes carbs.
 8. If the user says they did not eat something, exclude it.
+9. Use meal tags as additional context only if they help with identification or portion sizing.
 
 OUTPUT FORMAT:
 Return a raw JSON object only.
@@ -140,6 +143,7 @@ Return a raw JSON object only.
 
 Make sure total_carbs is consistent with the sum of the item carbs.
 User Context: ${input.userContext?.trim() || 'None'}
+Meal Tags: ${mealTags.length > 0 ? mealTags.join(', ') : 'None'}
 `
 }
 

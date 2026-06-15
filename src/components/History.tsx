@@ -9,11 +9,30 @@ import { supabase } from '@/lib/supabaseClient'
 
 const DetailsRenderer = ({ content }: { content: string }) => {
   try {
-    if (content.trim().startsWith('[')) {
-      const items: FoodItem[] = JSON.parse(content)
-      
+    const parsed = JSON.parse(content) as
+      | FoodItem[]
+      | {
+          items?: FoodItem[]
+          mealTags?: string[]
+        }
+
+    const items = Array.isArray(parsed) ? parsed : parsed.items
+
+    if (items) {
       return (
         <div className="space-y-3 mt-2">
+          {!Array.isArray(parsed) && parsed.mealTags && parsed.mealTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {parsed.mealTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-200 px-2.5 py-1"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           {items.map((item, i) => (
             <div key={i} className="flex justify-between items-start bg-white/5 p-3 rounded-lg border border-white/5">
               <div>

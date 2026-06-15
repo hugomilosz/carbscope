@@ -76,6 +76,7 @@ describe('POST /api/analyse', () => {
         imageUrl: 'https://example.com/meal.jpg',
         userContext: 'Lunch',
         mealSize: 'standard',
+        mealTags: ['home', 'lunch'],
       }),
     } as never
 
@@ -102,6 +103,9 @@ describe('POST /api/analyse', () => {
       primary_summary: 'Scout summary',
     })
     expect(getMockCreate()).toHaveBeenCalledTimes(1)
+    expect(getMockCreate().mock.calls[0][0].messages[0].content[0].text).toContain(
+      'Meal Tags: home, lunch'
+    )
   })
 
   it('retries once when the model returns invalid structured data', async () => {
