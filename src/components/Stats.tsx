@@ -3,8 +3,14 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { Loader2, TrendingUp, BarChart3, CalendarCheck } from 'lucide-react'
+import { Loader2, TrendingUp, BarChart3, CalendarCheck, Tags, Activity } from 'lucide-react'
 import { AnalysisRecord, DailyTotal, AuthenticatedComponentProps } from '@/lib/types'
+
+type TagInsight = {
+  tag: string
+  count: number
+  averageCarbs: number
+}
 
 export default function Stats({ userId }: AuthenticatedComponentProps) {
   const supabase = createClientComponentClient()
@@ -13,17 +19,19 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
   const [averageDaily, setAverageDaily] = useState(0)
   const [totalEntries, setTotalEntries] = useState(0)
   const [highestDay, setHighestDay] = useState<{ date: string; total: number } | null>(null)
+  const [mostUsedTag, setMostUsedTag] = useState<TagInsight | null>(null)
+  const [highestAverageTag, setHighestAverageTag] = useState<TagInsight | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchStats = useCallback(async () => {
     if (!userId) return
     setLoading(true)
 
-    type StatsQueryData = Pick<AnalysisRecord, 'created_at' | 'result_summary'>
+    type StatsQueryData = Pick<AnalysisRecord, 'created_at' | 'result_summary' | 'result_details'>
 
     const { data, error } = await supabase
       .from('analyses')
-      .select('created_at, result_summary')
+      .select('created_at, result_summary, result_details')
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
 
@@ -35,6 +43,7 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
 
     const records = data as unknown as StatsQueryData[]
     const totalsByDay: { [key: string]: number } = {}
+    const tagTotals: Record<string, { count: number; totalCarbs: number }> = {}
     
     records.forEach((entry) => {
       // Use (YYYY-MM-DD) for storing keys
@@ -43,6 +52,13 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
 
       if (!isNaN(carbs)) {
         totalsByDay[dateKey] = (totalsByDay[dateKey] || 0) + carbs
+        extractMealTags(entry.result_details).forEach((tag) => {
+          const current = tagTotals[tag] ?? { count: 0, totalCarbs: 0 }
+          tagTotals[tag] = {
+            count: current.count + 1,
+            totalCarbs: current.totalCarbs + carbs,
+          }
+        })
       }
     })
 
@@ -73,6 +89,8 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
     setAverageDaily(avg)
     setTotalEntries(records.length)
     setHighestDay(highest)
+    setMostUsedTag(getMostUsedTag(tagTotals))
+    setHighestAverageTag(getHighestAverageTag(tagTotals))
     setLoading(false)
   }, [userId, supabase])
 
@@ -126,6 +144,36 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
         </div>
       </div>
 
+      {(mostUsedTag || highestAverageTag) && (
+        <div className="grid md:grid-cols-2 gap-6 mb-8 text-white">
+          {mostUsedTag && (
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Tags className="w-6 h-6 text-emerald-300" />
+                <p className="text-sm text-white/60">Most logged tag</p>
+              </div>
+              <p className="text-2xl font-bold capitalize">{mostUsedTag.tag}</p>
+              <p className="text-white/50 text-sm">
+                {mostUsedTag.count} {mostUsedTag.count === 1 ? 'entry' : 'entries'}
+              </p>
+            </div>
+          )}
+
+          {highestAverageTag && (
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Activity className="w-6 h-6 text-cyan-300" />
+                <p className="text-sm text-white/60">Highest average tag</p>
+              </div>
+              <p className="text-2xl font-bold capitalize">{highestAverageTag.tag}</p>
+              <p className="text-white/50 text-sm">
+                {highestAverageTag.averageCarbs}g average carbs
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Chart */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Last 7 Days Trend</h3>
@@ -159,4 +207,38 @@ export default function Stats({ userId }: AuthenticatedComponentProps) {
       </div>
     </div>
   )
+}
+
+function extractMealTags(resultDetails: string) {
+  try {
+    const parsed = JSON.parse(resultDetails) as { mealTags?: unknown }
+    if (!Array.isArray(parsed.mealTags)) {
+      return []
+    }
+
+    return parsed.mealTags
+      .filter((tag): tag is string => typeof tag === 'string')
+      .map((tag) => tag.trim().toLowerCase())
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
+function getMostUsedTag(tagTotals: Record<string, { count: number; totalCarbs: number }>) {
+  return buildTagInsights(tagTotals).sort((left, right) => right.count - left.count)[0] ?? null
+}
+
+function getHighestAverageTag(tagTotals: Record<string, { count: number; totalCarbs: number }>) {
+  return buildTagInsights(tagTotals)
+    .filter((tag) => tag.count > 0)
+    .sort((left, right) => right.averageCarbs - left.averageCarbs)[0] ?? null
+}
+
+function buildTagInsights(tagTotals: Record<string, { count: number; totalCarbs: number }>) {
+  return Object.entries(tagTotals).map(([tag, values]) => ({
+    tag,
+    count: values.count,
+    averageCarbs: Math.round(values.totalCarbs / values.count),
+  }))
 }

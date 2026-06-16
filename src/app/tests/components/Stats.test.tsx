@@ -64,10 +64,26 @@ describe('Stats component', () => {
 
   it('renders stats and chart when data is fetched', async () => {
     const mockData = [
-      { created_at: '2025-10-28T10:00:00Z', result_summary: '50.5' },
-      { created_at: '2025-10-28T15:00:00Z', result_summary: '74.5' },
-      { created_at: '2025-10-29T11:00:00Z', result_summary: '100' },
-      { created_at: '2025-10-27T09:00:00Z', result_summary: '20' },
+      {
+        created_at: '2025-10-28T10:00:00Z',
+        result_summary: '50.5',
+        result_details: JSON.stringify({ mealTags: ['home', 'lunch'] }),
+      },
+      {
+        created_at: '2025-10-28T15:00:00Z',
+        result_summary: '74.5',
+        result_details: JSON.stringify({ mealTags: ['home', 'dinner'] }),
+      },
+      {
+        created_at: '2025-10-29T11:00:00Z',
+        result_summary: '100',
+        result_details: JSON.stringify({ mealTags: ['restaurant'] }),
+      },
+      {
+        created_at: '2025-10-27T09:00:00Z',
+        result_summary: '20',
+        result_details: 'legacy details',
+      },
     ]
     mockOrder.mockResolvedValue({ data: mockData, error: null })
 
@@ -82,6 +98,12 @@ describe('Stats component', () => {
     expect(screen.getByText('4')).toBeInTheDocument() // Total Entries
     expect(screen.getByText('125g')).toBeInTheDocument() // Busiest Day
     expect(screen.getByText(/Busiest Day \(Oct 28\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Most logged tag/i)).toBeInTheDocument()
+    expect(screen.getByText('home')).toBeInTheDocument()
+    expect(screen.getByText(/2 entries/i)).toBeInTheDocument()
+    expect(screen.getByText(/Highest average tag/i)).toBeInTheDocument()
+    expect(screen.getByText('restaurant')).toBeInTheDocument()
+    expect(screen.getByText(/100g average carbs/i)).toBeInTheDocument()
 
     expect(screen.getByTestId('recharts-container')).toBeInTheDocument()
     expect(screen.getByTestId('recharts-barchart')).toBeInTheDocument()
