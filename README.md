@@ -1,6 +1,6 @@
 # CarbScope - Carbohydrate Estimator from Food Images using Groq
 
-**CarbScope** is a web application that estimates the carbohydrate content of food items from an image. Built with Next.js and Supabase, it uses the **Groq API** with a single **Meta Llama 4 Scout** vision model in the live analysis path.
+**CarbScope** is a web application that estimates the carbohydrate content of food items from an image. Built with Next.js and Supabase, it uses the **Groq API** with a single **Qwen 3.6 27B** multimodal model in the live analysis path.
 
 Users can upload food images, receive a detailed carbohydrate analysis, track their history, and view a personal statistics dashboard.
 
@@ -19,7 +19,7 @@ https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
   Drag-and-drop or use a file picker to upload food images. Files are securely stored in **Supabase Storage**.
 
 - **Single-Model Vision Analysis**
-  Uses `meta-llama/llama-4-scout-17b-16e-instruct` to analyse the uploaded image and return a structured carbohydrate estimate.
+  Uses `qwen/qwen3.6-27b` to analyse the uploaded image and return a structured carbohydrate estimate.
 
 - **Meal Context Input**  
   Users can specify portion sizes (Small, Standard, Large) and add context notes (e.g., "I didn't eat the bun") to improve accuracy.
@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/c250fc8b-e2bf-4e83-afba-d68138adade4
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS, Lucide React  
 - **Backend API**: Next.js API Routes
-- **AI Processing**: [Groq API](https://groq.com/) with `meta-llama/llama-4-scout-17b-16e-instruct`
+- **AI Processing**: [Groq API](https://groq.com/) with `qwen/qwen3.6-27b`
 - **Authentication & Database**: Supabase (Auth, Postgres, Storage)
 
 ---

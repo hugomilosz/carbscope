@@ -54,7 +54,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
-  "description": "**CarbScope** is a web application that estimates the carbohydrate content of food items from an image using **Groq API** with the **Meta Llama 4 Scout** model. Built with Next.js and Supabase, it allows users to upload food images, receive a total carbohydrate estimate and itemised background, and track their analysis history.",
+  "description": "**CarbScope** is a web application that estimates the carbohydrate content of food items from an image using **Groq API** with the **Qwen 3.6 27B** multimodal model. Built with Next.js and Supabase, it allows users to upload food images, receive a total carbohydrate estimate and itemised background, and track their analysis history.",
   "main": "jest.setup.js",
   "repository": {
     "type": "git",

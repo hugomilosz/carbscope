@@ -134,7 +134,7 @@ describe('analyseFoodImage', () => {
     expect(result.totalCarbs).toBe(0)
     expect(result.items).toEqual([])
     expect(result.details).toMatchObject({
-      strategy: 'single_scout',
+      strategy: 'single_qwen',
       primary_model: PRIMARY_VISION_MODEL_ID,
       primary_total: 0,
       final_total: 0,

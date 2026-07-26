@@ -1,4 +1,4 @@
-export type AnalysisStrategy = 'single_scout'
+export type AnalysisStrategy = 'single_qwen'
 
 // API Types
 export interface FoodItem {

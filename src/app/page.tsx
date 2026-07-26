@@ -304,7 +304,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500 text-sm space-y-3">
-          <p>👨‍💻 Developed by Hugo Miloszewski • 🚀 Powered by Groq Llama 4 Scout</p>
+          <p>Developed by Hugo Miloszewski • Powered by Groq Qwen 3.6 27B</p>
           <div className="inline-flex items-center gap-2 text-rose-300/80 bg-rose-500/10 border border-rose-500/20 rounded-full px-4 py-1.5">
             <Shield className="w-3 h-3" />
             <span>For estimation only — not for medical use</span>

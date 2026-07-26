@@ -64,7 +64,7 @@ describe('POST /api/analyse', () => {
                 },
               ],
               total_carbs: 45,
-              summary_text: 'Scout summary',
+              summary_text: 'Qwen summary',
             }),
           },
         },
@@ -94,13 +94,13 @@ describe('POST /api/analyse', () => {
       confidence: 0.8,
     })
     expect(body.details).toMatchObject({
-      strategy: 'single_scout',
-      primary_label: 'Llama 4 Scout',
-      primary_model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      prompt_version: 'scout_v2_density_first',
+      strategy: 'single_qwen',
+      primary_label: 'Qwen 3.6 27B',
+      primary_model: 'qwen/qwen3.6-27b',
+      prompt_version: 'qwen_v1_density_first',
       primary_total: 52,
       final_total: 52,
-      primary_summary: 'Scout summary',
+      primary_summary: 'Qwen summary',
     })
     expect(getMockCreate()).toHaveBeenCalledTimes(1)
     expect(getMockCreate().mock.calls[0][0].messages[0].content[0].text).toContain(
@@ -109,12 +109,12 @@ describe('POST /api/analyse', () => {
   })
 
   it('retries once when the model returns invalid structured data', async () => {
-    let scoutCalls = 0
+    let modelCalls = 0
 
     getMockCreate().mockImplementation(async () => {
-      scoutCalls += 1
+      modelCalls += 1
 
-      if (scoutCalls === 1) {
+      if (modelCalls === 1) {
         return {
           choices: [
             {
@@ -159,7 +159,7 @@ describe('POST /api/analyse', () => {
 
     expect(response.status).toBe(200)
     expect(body.details.primary_summary).toBe('Recovered')
-    expect(body.details.strategy).toBe('single_scout')
+    expect(body.details.strategy).toBe('single_qwen')
     expect(body.totalCarbs).toBe(45)
     expect(getMockCreate()).toHaveBeenCalledTimes(2)
   })
