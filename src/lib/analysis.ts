@@ -5,11 +5,11 @@ import {
   AnalysisStrategy,
 } from './types'
 
-export const PRIMARY_VISION_MODEL_ID = 'meta-llama/llama-4-scout-17b-16e-instruct'
-export const PRIMARY_VISION_LABEL = 'Llama 4 Scout'
-export const PROMPT_VERSION = 'scout_v2_density_first'
+export const PRIMARY_VISION_MODEL_ID = 'qwen/qwen3.6-27b'
+export const PRIMARY_VISION_LABEL = 'Qwen 3.6 27B'
+export const PROMPT_VERSION = 'qwen_v1_density_first'
 
-const DEFAULT_STRATEGY: AnalysisStrategy = 'single_scout'
+const DEFAULT_STRATEGY: AnalysisStrategy = 'single_qwen'
 
 const foodItemSchema = z.object({
   name: z.string().min(1),
@@ -40,6 +40,7 @@ export interface AnalyseFoodImageInput {
   imageUrl: string
   userContext?: string
   mealSize?: string
+  mealTags?: string[]
 }
 
 export interface AnalyseFoodImageOptions {
@@ -81,7 +82,7 @@ export async function analyseFoodImage(
   const groq = options.groq ?? createGroqClient()
   const strategy = options.strategy ?? DEFAULT_STRATEGY
 
-  if (strategy !== 'single_scout') {
+  if (strategy !== 'single_qwen') {
     throw new Error(`Unsupported analysis strategy: ${strategy}`)
   }
 
@@ -93,7 +94,7 @@ export async function analyseFoodImage(
     totalCarbs: primaryTotal,
     items: primary.items,
     details: {
-      strategy: 'single_scout',
+      strategy: 'single_qwen',
       primary_label: PRIMARY_VISION_LABEL,
       primary_model: PRIMARY_VISION_MODEL_ID,
       prompt_version: PROMPT_VERSION,
@@ -106,6 +107,7 @@ export async function analyseFoodImage(
 
 function buildVisionPrompt(input: AnalyseFoodImageInput) {
   const mealSize = normaliseMealSize(input.mealSize)
+  const mealTags = Array.isArray(input.mealTags) ? input.mealTags.filter(Boolean) : []
 
   return `
 You are an expert nutritionist. Analyse the food in this image for carbohydrate content.
@@ -119,6 +121,7 @@ CRITICAL STEP - VOLUMETRIC ANALYSIS:
 6. Estimate carbohydrates conservatively and avoid inventing unseen ingredients.
 7. Exclude non-carbohydrate garnish unless it materially changes carbs.
 8. If the user says they did not eat something, exclude it.
+9. Use meal tags as additional context only if they help with identification or portion sizing.
 
 OUTPUT FORMAT:
 Return a raw JSON object only.
@@ -140,6 +143,7 @@ Return a raw JSON object only.
 
 Make sure total_carbs is consistent with the sum of the item carbs.
 User Context: ${input.userContext?.trim() || 'None'}
+Meal Tags: ${mealTags.length > 0 ? mealTags.join(', ') : 'None'}
 `
 }
 
@@ -165,39 +169,7 @@ async function runImageModel(
             ],
           },
         ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'food_analysis',
-            strict: false,
-            schema: {
-              type: 'object',
-              properties: {
-                items: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string' },
-                      portion_desc: { type: 'string' },
-                      weight_g: { type: 'number' },
-                      carbs_per_100g: { type: 'number' },
-                      carbs: { type: 'number' },
-                      confidence: { type: 'number' },
-                      reasoning: { type: 'string' },
-                    },
-                    required: ['name', 'weight_g'],
-                    additionalProperties: false,
-                  },
-                },
-                total_carbs: { type: 'number' },
-                summary_text: { type: 'string' },
-              },
-              required: ['items', 'summary_text'],
-              additionalProperties: false,
-            },
-          },
-        },
+        response_format: { type: 'json_object' },
       })
 
       const content = completion.choices[0].message.content

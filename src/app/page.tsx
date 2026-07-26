@@ -12,6 +12,17 @@ import AnalysisResultCard from '@/components/AnalysisResultsCard'
 import { AnalysisResult } from '@/lib/types'
 import { supabase } from '@/lib/supabaseClient'
 
+const MEAL_TAG_OPTIONS = [
+  'home',
+  'restaurant',
+  'takeout',
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'dessert',
+]
+
 export default function Home() {
   const { user, signOut } = useAuth()
   const [isGuest, setIsGuest] = useState(false)
@@ -22,6 +33,7 @@ export default function Home() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [userContext, setUserContext] = useState('')
   const [mealSize, setMealSize] = useState('standard')
+  const [mealTags, setMealTags] = useState<string[]>([])
 
   const handleUploadComplete = useCallback((url: string) => {
     setUploadedImageUrl(url)
@@ -37,6 +49,7 @@ export default function Home() {
     setUploadedImageUrl(null)
     setAnalysis(null)
     setUserContext('')
+    setMealTags([])
   }
 
   async function analyseImage() {
@@ -69,7 +82,7 @@ export default function Home() {
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize }),
+        body: JSON.stringify({ imageUrl: imageUrlForApi, userContext, mealSize, mealTags }),
       })
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
@@ -86,7 +99,11 @@ export default function Home() {
           user_id: user.id,
           image_url: uploadedImageUrl,
           result_summary: data.totalCarbs.toString(), 
-          result_details: JSON.stringify(data.items), 
+          result_details: JSON.stringify({
+            items: data.items,
+            mealTags,
+            details: data.details,
+          }),
         })
       }
     } catch (err: unknown) {
@@ -185,6 +202,45 @@ export default function Home() {
             />
           </div>
 
+          {/* Meal Tags */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-gray-300">Meal tags</p>
+              <button
+                type="button"
+                onClick={() => setMealTags([])}
+                className="text-xs text-gray-400 hover:text-white transition"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {MEAL_TAG_OPTIONS.map((tag) => {
+                const active = mealTags.includes(tag)
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() =>
+                      setMealTags((current) =>
+                        current.includes(tag)
+                          ? current.filter((value) => value !== tag)
+                          : [...current, tag]
+                      )
+                    }
+                    className={`px-3 py-2 rounded-full border text-sm transition-all ${
+                      active
+                        ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-200'
+                        : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Action Button */}
           {uploadedImageUrl && (
             <div className="mt-6">
@@ -248,7 +304,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500 text-sm space-y-3">
-          <p>👨‍💻 Developed by Hugo Miloszewski • 🚀 Powered by Groq Llama 4 Scout</p>
+          <p>Developed by Hugo Miloszewski • Powered by Groq Qwen 3.6 27B</p>
           <div className="inline-flex items-center gap-2 text-rose-300/80 bg-rose-500/10 border border-rose-500/20 rounded-full px-4 py-1.5">
             <Shield className="w-3 h-3" />
             <span>For estimation only — not for medical use</span>

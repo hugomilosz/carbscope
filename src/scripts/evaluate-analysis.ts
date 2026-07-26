@@ -11,7 +11,7 @@ import { AnalysisResult, AnalysisStrategy, FoodItem } from '../lib/types'
 
 const DEFAULT_DATASET_PATH = path.resolve(process.cwd(), 'src/evals/sample-meals.json')
 const DEFAULT_TOLERANCE_GRAMS = 10
-const STRATEGIES: AnalysisStrategy[] = ['single_scout']
+const STRATEGIES: AnalysisStrategy[] = ['single_qwen']
 
 interface EvalCliOptions {
   datasetPath: string
